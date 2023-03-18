@@ -1,7 +1,7 @@
 import tkinter
 from tkinter import ttk
-from config import vpk_path
-# Это простой файл струтуры, для структурирования данных в болнн удобном виде
+import winreg
+# Это простой файл струтуры, для структурирования данных в более удобном виде
 
 
 class Styles(ttk.Style):
@@ -392,3 +392,4 @@ class SettingsFrame(ttk.Frame):
             config.write(f'vpk_path = "{path}"')
             config.close()
         return path
+

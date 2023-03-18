@@ -1,9 +1,18 @@
 import re
-import tkinter
 from re import findall, IGNORECASE
 from os import system, path, rename, remove, mkdir
 from shutil import move, rmtree, Error, make_archive
 from Struct import *
+try:
+    from config import vpk_path
+except ModuleNotFoundError:
+    aReg = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
+    aKey = winreg.OpenKey(aReg, r"Software\\Valve\\Steam\\")
+    steam_path = winreg.QueryValueEx(aKey, 'SteamPath')[0]
+    with open('config.py', 'w') as config:
+        config.write('vpk_path = ' + f'"{steam_path}\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"')
+        config.close()
+    from config import vpk_path
 
 
 def vpk_parse(export_file_path, output_path, output_name=None):
@@ -215,5 +224,5 @@ if __name__ == '__main__':
     vpk_parse(export_file_path='resource/localization/items_russian.txt', output_path='')
     myapp = MainApp()
     myapp.geometry("1280x720")
-    myapp.resizable(0, 0)
+    myapp.resizable(False, False)
     myapp.main_window()
