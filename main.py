@@ -3,6 +3,7 @@ from re import findall, IGNORECASE
 from os import system, path, rename, remove, mkdir
 from shutil import move, rmtree, Error, make_archive
 from Struct import *
+
 try:
     from config import vpk_path
 except ModuleNotFoundError:
@@ -43,11 +44,11 @@ class CreateMod:
         self.custom_item_name = custom_item_name  # Название вещи на которую заменяем
         self.custom_item_path = ''  # Путь до вещи на которую заменяем
         self.default_item_path = ''  # Путь до стандартной вещи
-        self. particles = {} # Партиклы
+        self.particles = {}  # Партиклы
         self.mod_name = mod_name
         self.item_script_create()  # Создание скрипта
         output_name = self.default_item_path.split('/')[-1]  # Конечное имя vmdl файла
-        # Преобзразование пути до стандартной вещи в конечный путь для впк парсера
+        # Преобразование пути до стандартной вещи в конечный путь для впк парсера
         self.default_item_path = self.default_item_path.split('/')
         self.default_item_path = '/'.join(self.default_item_path[:-1])
         output_path = mod_name + "\\" + self.default_item_path
@@ -104,8 +105,9 @@ class CreateMod:
         custom_item_script = custom_item_script.replace(custom_item_model_player_path, default_model_player_path)
         custom_item_script = custom_item_script.replace('#' + custom_item_description_tag, custom_item_description)
         # Поиск партиклов
-        particles = re.findall(r'\"type\"\s*\"particle\"\s*?\"asset\"\s*?(\"[\s\S]*?\")\s*\"modifier\"\s*?(\"[\s\S]*?\")',
-                               custom_item_script)
+        particles = re.findall(
+            r'\"type\"\s*\"particle\"\s*?\"asset\"\s*?(\"[\s\S]*?\")\s*\"modifier\"\s*?(\"[\s\S]*?\")',
+            custom_item_script)
         for i in particles:
             key = i[0].strip('"')
             particle = i[1].strip('"')
@@ -119,12 +121,12 @@ class CreateMod:
 class MainApp(tkinter.Tk):
     def __init__(self):
         super(MainApp, self).__init__()
-        #style
+        # style
         style = Styles()
         style.theme_use('MyAppStyle')
         self.active_tab = ''
         self.change_mod_structure_frame = ConfigureMods(self, width=1280)  # Фрейм вкладки изменить конфигурацию мода
-        self.add_mods_frame = AddMods(self, width=1280) # Фрейм вкладки добавить моды
+        self.add_mods_frame = AddMods(self, width=1280)  # Фрейм вкладки добавить моды
         self.settings_frame = SettingsFrame(self, width=1280)  # Фрейм вкладки настройки
         self.settings_frame.confirm_button['command'] = self.confirm_settings
         self.header_frame = ttk.Frame(self, style='Header.TFrame', width=1280, height=72)
@@ -158,20 +160,21 @@ class MainApp(tkinter.Tk):
     def main_window(self):
         # Фреймы для вкладок
         self.add_mods_frame.add_mods_confirmation_button.configure(command=self.add_mods)
-        #Main_window placing
+        # Main_window placing
         self.header()
         self.add_mods_frame.grid(row=1, column=0)
         self.active_tab = 'Добавить моды'
-        #Tkinter mainloop
+        # Tkinter mainloop
         self.change_mod_structure_frame.change_button['command'] = self.change_values
         tkinter.mainloop()
 
     def add_mods(self):
-        default_item = self.add_mods_frame.standart_item_field.get()
-        custom_item = self.add_mods_frame.custom_item_field.get()
-        mod_name = self.add_mods_frame.mod_name_field.get()
+        default_item = str(self.add_mods_frame.standart_item_field.get())
+        custom_item = str(self.add_mods_frame.custom_item_field.get())
+        mod_name = str(self.add_mods_frame.mod_name_field.get())
         self.mod_items.add_items(mod_name=mod_name, custom_items=custom_item, default_items=default_item)
-        self.add_mods_frame.add_mod_info(new_mod_name=mod_name, new_custom_item=custom_item, new_default_item=default_item)
+        self.add_mods_frame.add_mod_info(new_mod_name=mod_name, new_custom_item=custom_item,
+                                         new_default_item=default_item)
         self.change_mod_structure_frame.add_mod_info(mod_name=mod_name, custom_item=custom_item,
                                                      default_item=default_item)
         self.add_mods_frame.clear_entry()
