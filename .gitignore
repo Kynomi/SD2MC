@@ -131,3 +131,4 @@ dmypy.json
 #My ignore
 ./items_game.txt
 ./items_russian.txt
+./config.py

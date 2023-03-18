@@ -1,6 +1,8 @@
 import tkinter
 from tkinter import ttk
 import winreg
+
+
 # Это простой файл струтуры, для структурирования данных в более удобном виде
 
 
@@ -8,7 +10,7 @@ class Styles(ttk.Style):
     def __init__(self, *args, **kwargs):
         super(Styles, self).__init__(*args, **kwargs)
         mystyle = super()
-        #TScrollBar style
+        # TScrollBar style
         mystyle.theme_create("MyAppStyle", parent="alt", settings={
             "TNotebook": {"configure": {"background": "#212224",
                                         "borderwidth": "0",
@@ -86,8 +88,8 @@ class Styles(ttk.Style):
                                          "relief": "flat",
                                          "arrowcolor": "#9f9f9f"},
                            "layout": [('Vertical.Scrollbar.trough', {'sticky': 'ns', 'children': [
-                ('Vertical.Scrollbar.thumb', {'sticky': 'nswe'})]})]}})
-        #Header
+                               ('Vertical.Scrollbar.thumb', {'sticky': 'nswe'})]})]}})
+        # Header
         mystyle.theme_settings("MyAppStyle", settings={
             'Header.TFrame': {"configure": {"background": "#2a2c2e"}}})
 
@@ -188,7 +190,7 @@ class AddMods(ttk.Frame):
         self.mod_info.xscroll.configure(style='Arrowless.Horizontal.scrollbar')
         self.mod_info.yscroll.configure(style='Arrowless.Vertical.scrollbar')
         self.mod_info.txt.configure(width=50, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'),
-                               foreground="#969698", background="#3d3d40")
+                                    foreground="#969698", background="#3d3d40")
         self.mod_info_choose_mod = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.font', ('Roboto/Roboto_Bold.ttf', '20', 'bold'))
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.background', "#3d3d40")
@@ -205,20 +207,25 @@ class AddMods(ttk.Frame):
         mod_info_height = 7
         self.mod_info.txt.configure(height=mod_info_height)
         sizes = self.mod_info.get_sizes()
-        mod_info_size_x = sizes[0][0]+sizes[2][0]
-        mod_info_size_y = sizes[0][1]+sizes[1][1]
-        margin = (mod_info_size_y - 3*self.mod_name_field.winfo_reqheight()) // 2
+        mod_info_size_x = sizes[0][0] + sizes[2][0]
+        mod_info_size_y = sizes[0][1] + sizes[1][1]
+        margin = (mod_info_size_y - 3 * self.mod_name_field.winfo_reqheight()) // 2
         mod_info_x = self.winfo_reqwidth() - mod_info_size_x
-        max_text_width = max(max(self.standart_item_label.winfo_reqwidth(), self.custom_item_label.winfo_reqwidth()), self.mod_name_label.winfo_reqwidth())
-        custom_item_y = max(self.standart_item_label.winfo_reqheight(), self.standart_item_field.winfo_reqheight()) + margin
-        mod_name_y = custom_item_y + margin + max(self.custom_item_label.winfo_reqheight(), self.custom_item_field.winfo_reqheight())
-        confirm_button_y = mod_name_y + margin + max(self.mod_name_label.winfo_reqheight(), self.mod_name_field.winfo_reqheight())
+        max_text_width = max(max(self.standart_item_label.winfo_reqwidth(), self.custom_item_label.winfo_reqwidth()),
+                             self.mod_name_label.winfo_reqwidth())
+        custom_item_y = max(self.standart_item_label.winfo_reqheight(),
+                            self.standart_item_field.winfo_reqheight()) + margin
+        mod_name_y = custom_item_y + margin + max(self.custom_item_label.winfo_reqheight(),
+                                                  self.custom_item_field.winfo_reqheight())
+        confirm_button_y = mod_name_y + margin + max(self.mod_name_label.winfo_reqheight(),
+                                                     self.mod_name_field.winfo_reqheight())
         labels_x = 15
-        fields_x = max_text_width+15+labels_x
+        fields_x = max_text_width + 15 + labels_x
         add_mods_confirmation_button_size_x = fields_x - labels_x + self.mod_name_field.winfo_reqwidth()
         mod_info_choose_mod_x = (mod_info_x - self.mod_info_choose_mod.winfo_reqwidth()) // 2 + mod_info_x
-        self.add_mods_confirmation_button.place(x=labels_x, y=confirm_button_y, width=add_mods_confirmation_button_size_x)
-        self.configure(height=confirm_button_y+self.add_mods_confirmation_button.winfo_reqheight())
+        self.add_mods_confirmation_button.place(x=labels_x, y=confirm_button_y,
+                                                width=add_mods_confirmation_button_size_x)
+        self.configure(height=confirm_button_y + self.add_mods_confirmation_button.winfo_reqheight())
         self.standart_item_label.place(x=labels_x, y=0)
         self.custom_item_label.place(x=labels_x, y=custom_item_y)
         self.mod_name_label.place(x=labels_x, y=mod_name_y)
@@ -228,10 +235,9 @@ class AddMods(ttk.Frame):
         self.mod_info.place(x=mod_info_x, y=0)
         self.mod_info_choose_mod.place(x=mod_info_choose_mod_x, y=confirm_button_y)
 
-    def add_mod_info(self, new_mod_name,  new_default_item, new_custom_item):
+    def add_mod_info(self, new_mod_name, new_default_item, new_custom_item):
         strings = f'{new_default_item} : {new_custom_item}'
-        index = None
-        if not new_mod_name in self.combobox_values:
+        if new_mod_name not in self.combobox_values:
             self.combobox_values.append(new_mod_name)
             self.text_strings.append([strings])
             index = self.combobox_values.index(new_mod_name)
@@ -251,6 +257,7 @@ class AddMods(ttk.Frame):
         self.mod_info.txt.insert('end', string)
 
     def change_mod_info(self, new_mod_name_array, new_custom_item_array, new_default_item_array):
+        index = None
         if new_mod_name_array is not None:
             new_mod_name, old_mod_name = new_mod_name_array[0], new_mod_name_array[1]
             for i in range(0, len(self.combobox_values)):
@@ -260,14 +267,28 @@ class AddMods(ttk.Frame):
             self.mod_info_choose_mod.current(self.combobox_values.index(new_mod_name))
         if new_custom_item_array is not None:
             new_custom_item, old_custom_item = new_custom_item_array
-            for i in range(0, len(self.text_strings)):
-                if old_custom_item in self.text_strings[i]:
-                    self.text_strings[i] = self.text_strings[i].replace(old_custom_item, new_custom_item)
+            for i in range (0, len(self.text_strings)):
+                for j in range(0, len(self.text_strings[i])):
+                    default_item, custom_item = self.text_strings[i][j].split(':')
+                    default_item = default_item.strip(' ')
+                    custom_item = custom_item.strip(' ')
+                    print(old_custom_item, custom_item)
+                    if old_custom_item == custom_item:
+                        custom_item = new_custom_item
+                        self.text_strings[i][j] = f'{default_item}:{custom_item}'
+                        break
         if new_default_item_array is not None:
             new_default_item, old_default_item = new_default_item_array
             for i in range(0, len(self.text_strings)):
-                if old_default_item in self.text_strings[i]:
-                    self.text_strings[i] = self.text_strings[i].replace(old_default_item, new_default_item)
+                for j in range(0, len(self.text_strings[i])):
+                    default_item, custom_item = self.text_strings[i][j].split(':')
+                    default_item = default_item.strip(' ')
+                    custom_item = custom_item.strip(' ')
+                    if old_default_item == default_item:
+                        default_item = new_default_item
+                        self.text_strings[i][j] = f'{default_item}:{custom_item}'
+                        break
+        self.combobox_current_value()
 
     def clear_entry(self):
         self.mod_name_field.delete(0, tkinter.END)
@@ -284,10 +305,10 @@ class ConfigureMods(ttk.Frame):
         self.mod_name_label = ttk.Label(self, text="Название модификации")
         self.mod_name_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
         self.mod_name_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
-        self.default_item_label = ttk.Label(self, text="Название скина")
+        self.default_item_label = ttk.Label(self, text="Название стандартной вещи")
         self.default_item_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
         self.default_item_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
-        self.custom_item_label = ttk.Label(self, text="Название стандартной вещи")
+        self.custom_item_label = ttk.Label(self, text="Название скина")
         self.custom_item_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
         self.custom_item_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
         self.change_button = ttk.Button(self, text='Изменить конфигурацию мода', command=self.change_mod)
@@ -295,7 +316,7 @@ class ConfigureMods(ttk.Frame):
         self.placing()
 
     def placing(self):
-        #Placing objects in frame
+        # Placing objects in frame
         self.mod_name_label.grid(row=0, column=0)
         self.mod_name_combobox.grid(row=1, column=0, pady=50)
         self.mod_name_field.grid(row=2, column=0)
@@ -345,7 +366,6 @@ class ConfigureMods(ttk.Frame):
         return change_mod_name, change_custom_item, change_default_item, mod_name
 
     def add_mod_info(self, mod_name, custom_item, default_item):
-        index = None
         if mod_name not in self.mod_name_combobox_value:
             self.mod_name_combobox_value.append(mod_name)
             index = self.mod_name_combobox_value.index(mod_name)
@@ -387,9 +407,8 @@ class SettingsFrame(ttk.Frame):
         self.confirm_button.grid(row=1, column=0, columnspan=2)
 
     def confirm_settings(self):
-        path = self.vpk_path_field.get() + "\steamapps\common\dota 2 beta\game\dota\pak01_dir.vpk"
+        path = self.vpk_path_field.get() + "\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"
         with open('config.py', 'w') as config:
             config.write(f'vpk_path = "{path}"')
             config.close()
         return path
-
