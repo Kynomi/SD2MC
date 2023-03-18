@@ -8,14 +8,12 @@ from Struct import *
 
 def vpk_parse(export_file_path, output_path, output_name=None):
     file_name = export_file_path.split('/')[-1]
-    print(output_path, "1 ый нужный")
     output_path = path.abspath(output_path)
     decompiler_path = path.abspath('Decompiler/Decompiler.exe')
     system(f'{decompiler_path} -i "{vp}" -f "{export_file_path}" -o "{output_path}"')
     start_path = path.abspath(output_path + '\\' + export_file_path)
     try:
         move(start_path, output_path)
-        print(start_path, output_path, '2ой')
     except Error:
         remove(output_path + '\\' + file_name)
         move(start_path, output_path)
@@ -94,6 +92,14 @@ class CreateMod:
 class MainApp(tkinter.Tk):
     def __init__(self):
         super(MainApp, self).__init__()
+        #style
+        style = Styles()
+        style.theme_use('MyAppStyle')
+        self.active_tab = ''
+        self.change_mod_structure_frame = ConfigureMods(self, width=1280)  # Фрейм вкладки изменить конфигурацию мода
+        self.add_mods_frame = AddMods(self, width=1280) # Фрейм вкладки добавить моды
+        self.settings_frame = ttk.Frame(self)  # Фрейм вкладки настройки
+        self.header_frame = ttk.Frame(self, style='Header.TFrame', width=1280, height=72)
         self.title('Dota2 Simple Mod Creater')
         if not path.exists('items_game.txt'):
             vpk_parse(export_file_path='scripts/items/items_game.txt', output_path='')
@@ -118,34 +124,17 @@ class MainApp(tkinter.Tk):
                 CreateMod(default_item_name=default_items[j], custom_item_name=custom_items[j],
                           mod_name=mod_name, script_name=f'script {j + 1}')
             make_archive(mod_name, 'zip', mod_name)
-            print('OK')
             rmtree(mod_name)
 
     def main_window(self):
         # Фреймы для вкладок
-        self.add_mods_frame = AddMods(self, width=1280) # Фрейм вкладки добавить моды
         self.add_mods_frame.add_mods_confirmation_button.configure(command=self.add_mods)
-        change_mod_structure_frame = ttk.Frame(self)  # Фрейм вкладки изменить конфигурацию мода
-        settings_frame = ttk.Frame(self)  # Фрейм вкладки настройки
-        header_frame = ttk.Frame(self, width=1280, height=70)  # Фрейм header
-        # Создание стиля
-        # header
-        header_tab = ttk.Notebook(header_frame)
-        header_button_compile_mods = ttk.Button(header_frame, text="Создать моды", command=self.create_mods)
-        header_tab.add(self.add_mods_frame)
-        header_tab.add(change_mod_structure_frame)
-        header_tab.add(settings_frame)
-        header_tab.tab(0, text='Добавить мод')
-        header_tab.tab(1, text='Изменить состав мода')
-        header_tab.tab(2, text='Настройки')
-        header_frame.grid(row=0, column=0, pady=(0, 50))
-        header_frame.pack_propagate(False)
-        header_tab.pack(side='left')
-        header_button_compile_mods.pack(side='right')
         #Main_window placing
-        self.add_mods_frame.grid(row=1, column=0)
-        self.add_mods_frame.pack_propagate(False)
+        self.header()
+        self.change_mod_structure_frame.grid(row=1, column=0)
+        self.active_tab = 'Изменить конфигурацию модов'
         #Tkinter mainloop
+        self.change_mod_structure_frame.change_button['command'] = self.change_values
         tkinter.mainloop()
 
     def add_mods(self):
@@ -154,16 +143,51 @@ class MainApp(tkinter.Tk):
         mod_name = self.add_mods_frame.mod_name_field.get()
         self.mod_items.add_items(mod_name=mod_name, custom_items=custom_item, default_items=default_item)
         self.add_mods_frame.add_mod_info(new_mod_name=mod_name, new_custom_item=custom_item, new_default_item=default_item)
+        self.change_mod_structure_frame.add_mod_info(mod_name=mod_name, custom_item=custom_item,
+                                                     default_item=default_item)
+        self.add_mods_frame.clear_entry()
 
+    def header(self):
+        create_mods_button = ttk.Button(self.header_frame, text="Создать моды", command=self.create_mods)
+        create_mods_button.pack(side='right', padx=2)
+        add_mods_tab = ttk.Button(self.header_frame, command=lambda: self.change_tab('Добавить моды'))
+        add_mods_tab['text'] = "Добавить моды"
+        add_mods_tab.pack(side='left', padx=2)
+        change_mods_tab = ttk.Button(self.header_frame, command=lambda: self.change_tab('Изменить конфигурацию модов'))
+        change_mods_tab['text'] = "Изменить конфигурацию модов"
+        change_mods_tab.pack(side='left', padx=2)
+        settings_tab = ttk.Button(self.header_frame, command=lambda: self.change_tab('Настройки'))
+        settings_tab['text'] = 'Настройки'
+        settings_tab.pack(side='left', padx=2)
+        self.header_frame.pack_propagate(False)
+        self.header_frame.grid(row=0, column=0, pady=(0, 50))
 
+    def change_tab(self, text):
+        dict = {"Добавить моды": self.add_mods_frame,
+                "Изменить конфигурацию модов": self.change_mod_structure_frame,
+                "Настройки": self.settings_frame}
+        dict[self.active_tab].grid_forget()
+        dict[text].grid(row=1, column=0)
+        self.active_tab = text
+
+    def change_values(self):
+        new_mod_name_array, new_custom_item_array, new_default_item_array, mod_name = self.change_mod_structure_frame.change_mod()
+        if new_mod_name_array is not None:
+            old_mod_name, new_mod_name = new_mod_name_array[1], new_mod_name_array[0]
+            self.mod_items.change_mod_name(old=old_mod_name, new=new_mod_name)
+        if new_custom_item_array is not None:
+            old_custom_item, new_custom_item = new_custom_item_array[1], new_custom_item_array[0]
+            self.mod_items.change_custom_item(old=old_custom_item, new=new_custom_item, mod_name=mod_name)
+        if new_default_item_array is not None:
+            old_default_item, new_default_item = new_default_item_array[1], new_default_item_array[0]
+            self.mod_items.change_custom_item(old=old_default_item, new=new_default_item, mod_name=mod_name)
+        self.add_mods_frame.change_mod_info(new_mod_name_array=new_mod_name_array,
+                                            new_custom_item_array=new_custom_item_array,
+                                            new_default_item_array=new_default_item_array)
 
 
 if __name__ == '__main__':
     myapp = MainApp()
-    # custom_items = ['Arms of Desolation', 'Horns of Eternal Harvest', 'Pauldrons of Eternal Harvest']
-    # default_items = ["Shadow Fiend's Arms", "Shadow Fiend's Head", "Shadow Fiend's Shoulders"]
-    # myapp.mod_items.add_items(mod_name='Shadow_fiend_sex', default_items=default_items, custom_items=custom_items)
-    # myapp.create_mods()
     myapp.geometry("1280x720")
     myapp.resizable(0, 0)
     myapp.main_window()
