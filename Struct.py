@@ -86,6 +86,9 @@ class Styles(ttk.Style):
                                          "arrowcolor": "#9f9f9f"},
                            "layout": [('Vertical.Scrollbar.trough', {'sticky': 'ns', 'children': [
                 ('Vertical.Scrollbar.thumb', {'sticky': 'nswe'})]})]}})
+        #Header
+        mystyle.theme_settings("MyAppStyle", settings={
+            'Header.TFrame': {"configure": {"background": "#2a2c2e"}}})
 
 
 class ModItems:
@@ -96,7 +99,7 @@ class ModItems:
 
     def add_items(self, mod_name, custom_items, default_items):
         if mod_name not in self.mod_names:
-            self.mod_names.append([mod_name])
+            self.mod_names.append(mod_name)
             self.custom_items.append([custom_items])
             self.default_items.append([default_items])
         else:
@@ -169,9 +172,6 @@ class AddMods(ttk.Frame):
         super(AddMods, self).__init__(*args, **kwargs)
         self.combobox_values = []
         self.text_strings = []
-        #style
-        style = Styles()
-        style.theme_use("MyAppStyle")
         # Lables
         self.standart_item_label = ttk.Label(self, text='Стандартная Вещь')
         self.custom_item_label = ttk.Label(self, text='Название вещи скина')
@@ -195,9 +195,9 @@ class AddMods(ttk.Frame):
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.selectBackground', "#33393f")
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.selectForeground', "white")
         self.mod_info_choose_mod.bind("<<ComboboxSelected>>", self.combobox_current_value)
-        self.place()
+        self.placing()
 
-    def place(self):
+    def placing(self):
         # Placing
         # mod_info_sizes
         self.mod_info.update()
@@ -248,3 +248,126 @@ class AddMods(ttk.Frame):
         self.mod_info.txt.configure(state='normal')
         self.mod_info.txt.delete('0.0', tkinter.END)
         self.mod_info.txt.insert('end', string)
+
+    def change_mod_info(self, new_mod_name_array, new_custom_item_array, new_default_item_array):
+        print(new_mod_name_array, new_custom_item_array, new_default_item_array)
+        if new_mod_name_array is not None:
+            new_mod_name, old_mod_name = new_mod_name_array[0], new_mod_name_array[1]
+            for i in range(0, len(self.combobox_values)):
+                if self.combobox_values[i] == old_mod_name:
+                    self.combobox_values[i] = new_mod_name
+            self.mod_info_choose_mod['value'] = self.combobox_values
+            self.mod_info_choose_mod.current(self.combobox_values.index(new_mod_name))
+        if new_custom_item_array is not None:
+            new_custom_item, old_custom_item = new_custom_item_array
+            for i in range(0, len(self.text_strings)):
+                if old_custom_item in self.text_strings[i]:
+                    self.text_strings[i] = self.text_strings[i].replace(old_custom_item, new_custom_item)
+        if new_default_item_array is not None:
+            new_default_item, old_default_item = new_default_item_array
+            for i in range(0, len(self.text_strings)):
+                if old_default_item in self.text_strings[i]:
+                    self.text_strings[i] = self.text_strings[i].replace(old_default_item, new_default_item)
+
+    def clear_entry(self):
+        self.mod_name_field.delete(0, tkinter.END)
+        self.custom_item_field.delete(0, tkinter.END)
+        self.standart_item_field.delete(0, tkinter.END)
+
+
+class ConfigureMods(ttk.Frame):
+    def __init__(self, *args, **kwargs):
+        super(ConfigureMods, self).__init__(*args, **kwargs)
+        self.mod_name_combobox_value = []
+        self.default_item_combobox_value = []
+        self.custom_item_combobox_value = []
+        self.mod_name_label = ttk.Label(self, text="Название модификации")
+        self.mod_name_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
+        self.mod_name_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
+        self.default_item_label = ttk.Label(self, text="Название скина")
+        self.default_item_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
+        self.default_item_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
+        self.custom_item_label = ttk.Label(self, text="Название стандартной вещи")
+        self.custom_item_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
+        self.custom_item_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
+        self.change_button = ttk.Button(self, text='Изменить конфигурацию мода', command=self.change_mod)
+        self.mod_name_combobox.bind('<<ComboboxSelected>>', self.current_combobox_value)
+        self.placing()
+
+    def placing(self):
+        #Placing objects in frame
+        self.mod_name_label.grid(row=0, column=0)
+        self.mod_name_combobox.grid(row=1, column=0, pady=50)
+        self.mod_name_field.grid(row=2, column=0)
+        self.default_item_label.grid(row=0, column=1, padx=25)
+        self.default_item_combobox.grid(row=1, column=1, pady=50, padx=25)
+        self.default_item_field.grid(row=2, column=1, padx=25)
+        self.custom_item_label.grid(row=0, column=2)
+        self.custom_item_combobox.grid(row=1, column=2, pady=50)
+        self.custom_item_field.grid(row=2, column=2)
+        self.change_button.grid(row=3, column=0, columnspan=3, pady=50)
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+        self.grid_rowconfigure(3, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+        self.grid_columnconfigure(2, weight=1)
+
+    def change_mod(self):
+        change_mod_name = None
+        change_custom_item = None
+        change_default_item = None
+        new_mod_name = self.mod_name_field.get()
+        new_custom_item = self.custom_item_field.get()
+        new_default_item = self.default_item_field.get()
+        old_mod_name = self.mod_name_combobox.get()
+        old_custom_item = self.custom_item_combobox.get()
+        old_default_item = self.default_item_combobox.get()
+        mod_name = old_mod_name
+        if old_mod_name is not '':
+            index = self.mod_name_combobox_value.index(old_mod_name)
+            if new_custom_item.replace(' ', '') != '':
+                index_in = self.custom_item_combobox_value[index].index(old_custom_item)
+                self.custom_item_combobox_value[index][index_in] = new_custom_item
+                change_custom_item = [new_custom_item, old_custom_item]
+            if new_default_item.replace(' ', '') != '':
+                index_in = self.default_item_combobox_value[index].index(old_default_item)
+                self.default_item_combobox_value[index][index_in] = new_default_item
+                change_default_item = [new_default_item, old_default_item]
+            if old_mod_name != new_mod_name and new_mod_name.replace(' ', '') != '':
+                self.mod_name_combobox_value[index] = new_mod_name
+                change_mod_name = [new_mod_name, old_mod_name]
+                mod_name = new_mod_name
+            self.mod_name_combobox['value'] = self.mod_name_combobox_value
+            self.mod_name_combobox.current(index)
+            self.current_combobox_value()
+        return change_mod_name, change_custom_item, change_default_item, mod_name
+
+    def add_mod_info(self, mod_name, custom_item, default_item):
+        index = None
+        if mod_name not in self.mod_name_combobox_value:
+            self.mod_name_combobox_value.append(mod_name)
+            index = self.mod_name_combobox_value.index(mod_name)
+            self.custom_item_combobox_value.append([custom_item])
+            self.default_item_combobox_value.append([default_item])
+        else:
+            index = self.mod_name_combobox_value.index(mod_name)
+            self.custom_item_combobox_value[index].append(custom_item)
+            self.default_item_combobox_value[index].append(default_item)
+        self.mod_name_combobox['value'] = self.mod_name_combobox_value
+        self.mod_name_combobox.current(index)
+        self.current_combobox_value()
+
+    def current_combobox_value(self, event=None):
+        mod_name = self.mod_name_combobox.get()
+        index = self.mod_name_combobox_value.index(mod_name)
+        self.custom_item_combobox['value'] = self.custom_item_combobox_value[index]
+        self.default_item_combobox['value'] = self.default_item_combobox_value[index]
+        self.custom_item_combobox.current(0)
+        self.default_item_combobox.current(0)
+
+    def clear_entry(self):
+        self.mod_name_field.delete(0, tkinter.END)
+        self.custom_item_field.delete(0, tkinter.END)
+        self.default_item_field.delete(0, tkinter.END)
