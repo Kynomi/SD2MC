@@ -1,21 +1,23 @@
+import re
 import tkinter
 from re import findall, IGNORECASE
-from config import vpk_path as vp
 from os import system, path, rename, remove, mkdir
 from shutil import move, rmtree, Error, make_archive
 from Struct import *
 
 
 def vpk_parse(export_file_path, output_path, output_name=None):
+    if '\\' in export_file_path:
+        export_file_path = export_file_path.replace('\\', '/')
     file_name = export_file_path.split('/')[-1]
     output_path = path.abspath(output_path)
     decompiler_path = path.abspath('Decompiler/Decompiler.exe')
-    system(f'{decompiler_path} -i "{vp}" -f "{export_file_path}" -o "{output_path}"')
+    system(f'{decompiler_path} -i "{vpk_path}" -f "{export_file_path}" -o "{output_path}"')
     start_path = path.abspath(output_path + '\\' + export_file_path)
     try:
         move(start_path, output_path)
     except Error:
-        remove(output_path + '\\' + file_name)
+        remove(path.relpath(output_path) + '\\' + file_name)
         move(start_path, output_path)
     if output_name is not None:
         if not output_name.replace(' ', '') == '':
@@ -32,15 +34,24 @@ class CreateMod:
         self.custom_item_name = custom_item_name  # Название вещи на которую заменяем
         self.custom_item_path = ''  # Путь до вещи на которую заменяем
         self.default_item_path = ''  # Путь до стандартной вещи
+        self. particles = {} # Партиклы
         self.mod_name = mod_name
         self.item_script_create()  # Создание скрипта
         output_name = self.default_item_path.split('/')[-1]  # Конечное имя vmdl файла
         # Преобзразование пути до стандартной вещи в конечный путь для впк парсера
         self.default_item_path = self.default_item_path.split('/')
-        self.default_item_path = '/'.join(self.default_item_path[0:len(self.default_item_path) - 1])
+        self.default_item_path = '/'.join(self.default_item_path[:-1])
         output_path = mod_name + "\\" + self.default_item_path
         # Парс вещи для мода
         vpk_parse(export_file_path=self.custom_item_path, output_path=output_path, output_name=output_name)
+        # Парс партиклов для мода
+        for original_particle, new_particle in self.particles.items():
+            new_particle = new_particle + '_c'
+            output_particle_path = original_particle.split('/')
+            output_particle_path = '\\'.join(output_particle_path[:-1])
+            output_particle_path = mod_name + "\\" + output_particle_path
+            output_particle_name = original_particle.split('/')[-1] + '_c'
+            vpk_parse(export_file_path=new_particle, output_path=output_particle_path, output_name=output_particle_name)
 
     def item_script_create(self):
         # Регулярное выражение для поиска скрипта по названию предмета
@@ -48,7 +59,7 @@ class CreateMod:
         # \"нужное поле\"\s*\"([\s\S]*?)\" поиск любого аттрибута в скрипте
         items_game = open('items_game.txt', 'r', encoding='utf-8')  # Файл items_game
         # Файл end_script
-        end_script_file = open(f'{self.mod_name}\\mor_scripts\\{self.script_name}', 'w+', encoding='utf-8')
+        end_script_file = open(f'{self.mod_name}\\mor_scripts\\{self.script_name}.txt', 'w+', encoding='utf-8')
         items_game_text = items_game.read()  # Текст файла items_game
         items_game.close()  # Закрывание файла
         # Регулярные выражения для поиска необходимых аттрибутов
@@ -83,6 +94,13 @@ class CreateMod:
         custom_item_script = custom_item_script.replace(self.custom_item_name, self.default_item_name)
         custom_item_script = custom_item_script.replace(custom_item_model_player_path, default_model_player_path)
         custom_item_script = custom_item_script.replace('#' + custom_item_description_tag, custom_item_description)
+        # Поиск партиклов
+        particles = re.findall(r'\"type\"\s*\"particle\"\s*?\"asset\"\s*?(\"[\s\S]*?\")\s*\"modifier\"\s*?(\"[\s\S]*?\")',
+                               custom_item_script)
+        for i in particles:
+            key = i[0].strip('"')
+            particle = i[1].strip('"')
+            self.particles[key] = particle
         end_script_file.write(custom_item_script)
         end_script_file.close()
         self.default_item_path = default_model_player_path + '_c'
@@ -98,7 +116,8 @@ class MainApp(tkinter.Tk):
         self.active_tab = ''
         self.change_mod_structure_frame = ConfigureMods(self, width=1280)  # Фрейм вкладки изменить конфигурацию мода
         self.add_mods_frame = AddMods(self, width=1280) # Фрейм вкладки добавить моды
-        self.settings_frame = ttk.Frame(self)  # Фрейм вкладки настройки
+        self.settings_frame = SettingsFrame(self, width=1280)  # Фрейм вкладки настройки
+        self.settings_frame.confirm_button['command'] = self.confirm_settings
         self.header_frame = ttk.Frame(self, style='Header.TFrame', width=1280, height=72)
         self.title('Dota2 Simple Mod Creater')
         if not path.exists('items_game.txt'):
@@ -121,6 +140,7 @@ class MainApp(tkinter.Tk):
                 mkdir(mod_name)
                 mkdir(mod_name + '\\mor_scripts')
             for j in range(0, len(default_items)):
+                print(f"now creating: {mod_name}, item: {custom_items[j]}")
                 CreateMod(default_item_name=default_items[j], custom_item_name=custom_items[j],
                           mod_name=mod_name, script_name=f'script {j + 1}')
             make_archive(mod_name, 'zip', mod_name)
@@ -131,8 +151,8 @@ class MainApp(tkinter.Tk):
         self.add_mods_frame.add_mods_confirmation_button.configure(command=self.add_mods)
         #Main_window placing
         self.header()
-        self.change_mod_structure_frame.grid(row=1, column=0)
-        self.active_tab = 'Изменить конфигурацию модов'
+        self.add_mods_frame.grid(row=1, column=0)
+        self.active_tab = 'Добавить моды'
         #Tkinter mainloop
         self.change_mod_structure_frame.change_button['command'] = self.change_values
         tkinter.mainloop()
@@ -185,8 +205,14 @@ class MainApp(tkinter.Tk):
                                             new_custom_item_array=new_custom_item_array,
                                             new_default_item_array=new_default_item_array)
 
+    def confirm_settings(self):
+        global vpk_path
+        vpk_path = self.settings_frame.confirm_settings()
+
 
 if __name__ == '__main__':
+    vpk_parse(export_file_path='scripts\\items\\items_game.txt', output_path='')
+    vpk_parse(export_file_path='resource/localization/items_russian.txt', output_path='')
     myapp = MainApp()
     myapp.geometry("1280x720")
     myapp.resizable(0, 0)
