@@ -1,5 +1,6 @@
 import tkinter
 from tkinter import ttk
+from config import vpk_path
 # Это простой файл струтуры, для структурирования данных в болнн удобном виде
 
 
@@ -250,7 +251,6 @@ class AddMods(ttk.Frame):
         self.mod_info.txt.insert('end', string)
 
     def change_mod_info(self, new_mod_name_array, new_custom_item_array, new_default_item_array):
-        print(new_mod_name_array, new_custom_item_array, new_default_item_array)
         if new_mod_name_array is not None:
             new_mod_name, old_mod_name = new_mod_name_array[0], new_mod_name_array[1]
             for i in range(0, len(self.combobox_values)):
@@ -325,7 +325,7 @@ class ConfigureMods(ttk.Frame):
         old_custom_item = self.custom_item_combobox.get()
         old_default_item = self.default_item_combobox.get()
         mod_name = old_mod_name
-        if old_mod_name is not '':
+        if old_mod_name != '':
             index = self.mod_name_combobox_value.index(old_mod_name)
             if new_custom_item.replace(' ', '') != '':
                 index_in = self.custom_item_combobox_value[index].index(old_custom_item)
@@ -371,3 +371,24 @@ class ConfigureMods(ttk.Frame):
         self.mod_name_field.delete(0, tkinter.END)
         self.custom_item_field.delete(0, tkinter.END)
         self.default_item_field.delete(0, tkinter.END)
+
+
+class SettingsFrame(ttk.Frame):
+    def __init__(self, *args, **kwargs):
+        super(SettingsFrame, self).__init__(*args, **kwargs)
+        self.vpk_path_label = ttk.Label(self, text='Введите путь до стима')
+        self.vpk_path_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
+        self.confirm_button = ttk.Button(self, text="Применить настройки")
+        self.placing()
+
+    def placing(self):
+        self.vpk_path_label.grid(row=0, column=0, sticky=tkinter.W, pady=50)
+        self.vpk_path_field.grid(row=0, column=1, padx=50, pady=50)
+        self.confirm_button.grid(row=1, column=0, columnspan=2)
+
+    def confirm_settings(self):
+        path = self.vpk_path_field.get() + "\steamapps\common\dota 2 beta\game\dota\pak01_dir.vpk"
+        with open('config.py', 'w') as config:
+            config.write(f'vpk_path = "{path}"')
+            config.close()
+        return path
