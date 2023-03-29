@@ -1,4 +1,5 @@
 import re
+from tkinter import messagebox
 from re import findall, IGNORECASE
 from os import system, path, rename, remove, mkdir
 from shutil import move, rmtree, Error, make_archive
@@ -11,6 +12,7 @@ except ModuleNotFoundError:
     aKey = winreg.OpenKey(aReg, r"Software\\Valve\\Steam\\")
     steam_path = winreg.QueryValueEx(aKey, 'SteamPath')[0]
     with open('config.py', 'w') as config:
+        steam_path = steam_path.replace("/", "\\")
         config.write('vpk_path = ' + f'"{steam_path}\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"')
         config.close()
     from config import vpk_path
@@ -156,6 +158,7 @@ class MainApp(tkinter.Tk):
                           mod_name=mod_name, script_name=f'script {j + 1}')
             make_archive(mod_name, 'zip', mod_name)
             rmtree(mod_name)
+        messagebox.showinfo('Мод статус', 'Модификации были успешно созданы')
 
     def main_window(self):
         # Фреймы для вкладок

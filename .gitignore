@@ -129,6 +129,6 @@ dmypy.json
 .pyre/
 
 #My ignore
-./items_game.txt
-./items_russian.txt
-./config.py
+items_game.txt
+items_russian.txt
+config.py
