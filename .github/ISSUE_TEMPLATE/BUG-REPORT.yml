@@ -28,3 +28,8 @@ body:
       label: Input here what items did you try to create
       description: Please input here what standart and custom items did you try to create such a modification
       render: shell
+  - type: input
+    id: Contact
+    attributes:
+      label: Email, discord, telegram or vk
+      value: email@email.com
