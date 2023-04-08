@@ -48,76 +48,85 @@ class CreateMod:
         self.default_item_path = ''  # Путь до стандартной вещи
         self.particles = {}  # Партиклы
         self.mod_name = mod_name
-        self.item_script_create()  # Создание скрипта
-        output_name = self.default_item_path.split('/')[-1]  # Конечное имя vmdl файла
-        # Преобразование пути до стандартной вещи в конечный путь для впк парсера
-        self.default_item_path = self.default_item_path.split('/')
-        self.default_item_path = '/'.join(self.default_item_path[:-1])
-        output_path = mod_name + "\\" + self.default_item_path
-        # Парс вещи для мода
-        vpk_parse(export_file_path=self.custom_item_path, output_path=output_path, output_name=output_name)
-        # Парс партиклов для мода
-        for original_particle, new_particle in self.particles.items():
-            new_particle = new_particle + '_c'
-            output_particle_path = original_particle.split('/')
-            output_particle_path = '\\'.join(output_particle_path[:-1])
-            output_particle_path = mod_name + "\\" + output_particle_path
-            output_particle_name = original_particle.split('/')[-1] + '_c'
-            vpk_parse(export_file_path=new_particle, output_path=output_particle_path, output_name=output_particle_name)
+        if self.item_script_create() is not False:# Создание скрипта
+            output_name = self.default_item_path.split('/')[-1]  # Конечное имя vmdl файла
+            # Преобразование пути до стандартной вещи в конечный путь для впк парсера
+            self.default_item_path = self.default_item_path.split('/')
+            self.default_item_path = '/'.join(self.default_item_path[:-1])
+            output_path = mod_name + "\\" + self.default_item_path
+            # Парс вещи для мода
+            vpk_parse(export_file_path=self.custom_item_path, output_path=output_path, output_name=output_name)
+            # Парс партиклов для мода
+            for original_particle, new_particle in self.particles.items():
+                new_particle = new_particle + '_c'
+                output_particle_path = original_particle.split('/')
+                output_particle_path = '\\'.join(output_particle_path[:-1])
+                output_particle_path = mod_name + "\\" + output_particle_path
+                output_particle_name = original_particle.split('/')[-1] + '_c'
+                vpk_parse(export_file_path=new_particle, output_path=output_particle_path, output_name=output_particle_name)
+        else:
+            remove(f'{self.mod_name}\\mor_scripts\\{self.script_name}.txt')
+            print(f'{self.custom_item_name} не был создан')
 
     def item_script_create(self):
         # Регулярное выражение для поиска скрипта по названию предмета
         # ({[\s\t\n] * ?\"name\"\s*\"Shadow Fiend's Head\"[\s\S]*})[\s\t\n]*\"\d*?\"
         # \"нужное поле\"\s*\"([\s\S]*?)\" поиск любого аттрибута в скрипте
-        items_game = open('items_game.txt', 'r', encoding='utf-8')  # Файл items_game
-        # Файл end_script
-        end_script_file = open(f'{self.mod_name}\\mor_scripts\\{self.script_name}.txt', 'w+', encoding='utf-8')
-        items_game_text = items_game.read()  # Текст файла items_game
-        items_game.close()  # Закрывание файла
-        # Регулярные выражения для поиска необходимых аттрибутов
-        script_expression = r"({[\s\t\n]*?\"name\"\s*?\"" + f"{self.default_item_name}" + r"\"[\s\S]*?})[\s\t\n]*?\"\d*?\""
-        model_path_expression = rf'\"model_player\"\s*\"([\s\S]*?)\"'
-        custom_item_description_tag_expression = rf'\"item_description\"\s*\"([\s\S]*?)\"'
-        # Поиск скрипта стандартного предмета
-        default_item_script = findall(script_expression, items_game_text, IGNORECASE)[0]
-        # Поиск пути до файла стандартной модели
-        default_model_player_path = findall(model_path_expression, default_item_script, IGNORECASE)[0]
-        # Обновление регулярного выражения
-        script_expression = r"({[\s\t\n]*?\"name\"\s*?\"" + f"{self.custom_item_name}" + r"\"[\s\S]*?})[\s\t\n]*?\"\d*?\""
-        # Поиск скрипта предмета, на который заменяем
-        custom_item_script = findall(script_expression, items_game_text, IGNORECASE)[0]
-        del script_expression
-        # Поиск пути до модели, на которую будем заменять
-        custom_item_model_player_path = findall(model_path_expression, custom_item_script, IGNORECASE)[0]
-        del model_path_expression
-        # Поиск тега для поиска названия кастомного предмета
-        custom_item_description_tag = findall(custom_item_description_tag_expression, custom_item_script, IGNORECASE)[0]
-        custom_item_description_tag = custom_item_description_tag.replace('#', '')
-        del custom_item_description_tag_expression
-        items_russian = open('items_russian.txt', 'r', encoding='utf-8')  # Файл items_russian
-        items_russian_text = items_russian.read()  # Текст файла items_russian
-        items_russian.close()  # Закрытие файла items_russian
-        # Поиск описания вещи
-        # "DOTA_Bundle_Assemblage_of_Announcers_Pack"        "Комплект «Собрание комментаторов»"
-        custom_item_description_expression = rf"\"{custom_item_description_tag}\"\s*?\"([\s\S]*?)\""
-        custom_item_description = findall(custom_item_description_expression, items_russian_text, IGNORECASE)[0]
-        # Замены строк в скрипте
-        custom_item_script = custom_item_script.replace('wearable', 'default_item')
-        custom_item_script = custom_item_script.replace(self.custom_item_name, self.default_item_name)
-        custom_item_script = custom_item_script.replace(custom_item_model_player_path, default_model_player_path)
-        custom_item_script = custom_item_script.replace('#' + custom_item_description_tag, custom_item_description)
-        # Поиск партиклов
-        particles = re.findall(
-            r'\"type\"\s*\"particle\"\s*?\"asset\"\s*?(\"[\s\S]*?\")\s*\"modifier\"\s*?(\"[\s\S]*?\")',
-            custom_item_script)
-        for i in particles:
-            key = i[0].strip('"')
-            particle = i[1].strip('"')
-            self.particles[key] = particle
-        end_script_file.write(custom_item_script)
-        end_script_file.close()
-        self.default_item_path = default_model_player_path + '_c'
-        self.custom_item_path = custom_item_model_player_path + '_c'
+        with open('items_game.txt', 'r', encoding='utf-8') as items_game: # Файл items_game
+            # Файл end_script
+            with open(f'{self.mod_name}\\mor_scripts\\{self.script_name}.txt', 'w+', encoding='utf-8') as end_script_file:
+                items_game_text = items_game.read()  # Текст файла items_game
+                items_game.close()  # Закрывание файла
+                # Регулярные выражения для поиска необходимых аттрибутов
+                script_expression = r"({[\s\t\n]*?\"name\"\s*?\"" + f"{self.default_item_name}" + r"\"[\s\S]*?})[\s\t\n]*?\"\d*?\""
+                model_path_expression = rf'\"model_player\"\s*\"([\s\S]*?)\"'
+                custom_item_description_tag_expression = rf'\"item_description\"\s*\"([\s\S]*?)\"'
+                # Поиск скрипта стандартного предмета
+                default_item_script = findall(script_expression, items_game_text, IGNORECASE)[0]
+                # Поиск пути до файла стандартной модели
+                try:
+                    default_model_player_path = findall(model_path_expression, default_item_script, IGNORECASE)[0]
+                except IndexError:
+                    return False
+                # Обновление регулярного выражения
+                script_expression = r"({[\s\t\n]*?\"name\"\s*?\"" + f"{self.custom_item_name}" + r"\"[\s\S]*?})[\s\t\n]*?\"\d*?\""
+                # Поиск скрипта предмета, на который заменяем
+                try:
+                    custom_item_script = findall(script_expression, items_game_text, IGNORECASE)[0]
+                except IndexError:
+                    return False
+                del script_expression
+                # Поиск пути до модели, на которую будем заменять
+                custom_item_model_player_path = findall(model_path_expression, custom_item_script, IGNORECASE)[0]
+                del model_path_expression
+                # Поиск тега для поиска названия кастомного предмета
+                try:
+                    with open('items_russian.txt', 'r', encoding='utf-8') as items_russian:  # Файл items_russian
+                        items_russian_text = items_russian.read()  # Текст файла items_russian
+                        custom_item_description_tag = findall(custom_item_description_tag_expression, custom_item_script, IGNORECASE)[0]
+                        custom_item_description_tag = custom_item_description_tag.replace('#', '')
+                        # Поиск описания вещи
+                        # "DOTA_Bundle_Assemblage_of_Announcers_Pack"        "Комплект «Собрание комментаторов»"
+                        custom_item_description_expression = rf"\"{custom_item_description_tag}\"\s*?\"([\s\S]*?)\""
+                        custom_item_description = findall(custom_item_description_expression, items_russian_text, IGNORECASE)[0]
+                        del custom_item_description_tag_expression
+                        custom_item_script = custom_item_script.replace('#' + custom_item_description_tag, custom_item_description)
+                except IndexError:
+                    print(f'У {self.custom_item_name} нет описания')
+                # Замены строк в скрипте
+                custom_item_script = custom_item_script.replace('wearable', 'default_item')
+                custom_item_script = custom_item_script.replace(self.custom_item_name, self.default_item_name)
+                custom_item_script = custom_item_script.replace(custom_item_model_player_path, default_model_player_path)
+                # Поиск партиклов
+                particles = re.findall(r'\"type\"\s*\"particle\"\s*?\"asset\"\s*?(\"[\s\S]*?\")\s*\"modifier\"\s*?(\"[\s\S]*?\")', custom_item_script)
+                for i in particles:
+                    key = i[0].strip('"')
+                    particle = i[1].strip('"')
+                    self.particles[key] = particle
+                end_script_file.write(custom_item_script)
+                end_script_file.close()
+                self.default_item_path = default_model_player_path + '_c'
+                self.custom_item_path = custom_item_model_player_path + '_c'
 
 
 class MainApp(tkinter.Tk):
