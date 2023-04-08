@@ -255,6 +255,7 @@ class AddMods(ttk.Frame):
         self.mod_info.txt.configure(state='normal')
         self.mod_info.txt.delete('0.0', tkinter.END)
         self.mod_info.txt.insert('end', string)
+        self.mod_info.txt.configure(state='disabled')
 
     def change_mod_info(self, new_mod_name_array, new_custom_item_array, new_default_item_array):
         index = None
@@ -294,6 +295,7 @@ class AddMods(ttk.Frame):
         self.mod_name_field.delete(0, tkinter.END)
         self.custom_item_field.delete(0, tkinter.END)
         self.standart_item_field.delete(0, tkinter.END)
+        self.mod_name_field.insert(0, self.mod_info_choose_mod.get())
 
 
 class ConfigureMods(ttk.Frame):
