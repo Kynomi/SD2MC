@@ -3,9 +3,6 @@ from tkinter import ttk
 import winreg
 
 
-# Это простой файл струтуры, для структурирования данных в более удобном виде
-
-
 class Styles(ttk.Style):
     def __init__(self, *args, **kwargs):
         super(Styles, self).__init__(*args, **kwargs)
