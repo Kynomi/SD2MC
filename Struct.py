@@ -328,7 +328,7 @@ class ConfigureMods(ttk.Frame):
         self.custom_item_label.grid(row=0, column=2)
         self.custom_item_combobox.grid(row=1, column=2, pady=50)
         self.custom_item_field.grid(row=2, column=2)
-        self.change_button.grid(row=3, column=0, columnspan=3, pady=50)
+        self.change_button.grid(row=3, column=0, columnspan=3, pady=(50, 0))
         self.grid_rowconfigure(0, weight=1)
         self.grid_rowconfigure(1, weight=1)
         self.grid_rowconfigure(2, weight=1)
@@ -409,7 +409,7 @@ class SettingsFrame(ttk.Frame):
         self.confirm_button.grid(row=1, column=0, columnspan=2)
 
     def confirm_settings(self):
-        path = self.vpk_path_field.get() + "\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"
+        path = self.vpk_path_field.get().replace('/', '\\') + "\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"
         with open('config.py', 'w') as config:
             config.write(f'vpk_path = "{path}"')
             config.close()

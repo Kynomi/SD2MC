@@ -1,0 +1,35 @@
+name: Bug Report
+description: Before creating an bug report please check steam path, check rights of item names, check that you are not trying to create impossible items like arcanas or morphling set.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees:
+  - octocat
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+      - label: I have searched the existing issues
+        required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Also tell us, what did you expect to happen?
+      value: "Tell us what you see!"
+  - type: textarea
+    id: items
+    attributes:
+      label: Input here what items did you try to create
+      description: Please input here what standart and custom items did you try to create such a modification
+      render: shell
+  - type: input
+    id: Contact
+    attributes:
+      label: Email, discord, telegram or vk
+      value: email@email.com
