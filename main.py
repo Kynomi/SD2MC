@@ -40,8 +40,8 @@ def vpk_parse(export_file_path, output_path, output_name=None):
 
 
 class CreateMod:
-    def __init__(self, default_item_name, custom_item_name, mod_name, script_name):
-        self.script_name = script_name
+    def __init__(self, default_item_name, custom_item_name, mod_name, script_number):
+        self.script_name = f'script {script_number}'
         self.default_item_name = default_item_name  # Название стандартной вещи
         self.custom_item_name = custom_item_name  # Название вещи на которую заменяем
         self.custom_item_path = ''  # Путь до вещи на которую заменяем
@@ -64,9 +64,11 @@ class CreateMod:
                 output_particle_path = mod_name + "\\" + output_particle_path
                 output_particle_name = original_particle.split('/')[-1] + '_c'
                 vpk_parse(export_file_path=new_particle, output_path=output_particle_path, output_name=output_particle_name)
+            self.script_name = script_number + 1
         else:
             remove(f'{self.mod_name}\\mor_scripts\\{self.script_name}.txt')
             print(f'{self.custom_item_name} не был создан')
+            script_name = script_number
 
     def item_script_create(self):
         # Регулярное выражение для поиска скрипта по названию предмета
@@ -151,6 +153,7 @@ class MainApp(tkinter.Tk):
 
     def create_mods(self):
         mod_count = self.mod_items.mods_count()
+        next_script = 1
         for i in range(0, mod_count):
             mod_name = self.mod_items.get_mod_name(i)
             custom_items, default_items = self.mod_items.get_mod(i)
@@ -163,8 +166,9 @@ class MainApp(tkinter.Tk):
                 mkdir(mod_name + '\\mor_scripts')
             for j in range(0, len(default_items)):
                 print(f"now creating: {mod_name}, item: {custom_items[j]}")
-                CreateMod(default_item_name=default_items[j], custom_item_name=custom_items[j],
-                          mod_name=mod_name, script_name=f'script {j + 1}')
+                mod = CreateMod(default_item_name=default_items[j], custom_item_name=custom_items[j],
+                          mod_name=mod_name, script_number=next_script)
+                next_script = mod.script_name
             make_archive(mod_name, 'zip', mod_name)
             rmtree(mod_name)
         messagebox.showinfo('Мод статус', 'Модификации были успешно созданы')
