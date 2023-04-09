@@ -91,7 +91,7 @@ class CreateMod:
                 except IndexError:
                     return False
                 # Обновление регулярного выражения
-                script_expression = r"({[\s\t\n]*?\"name\"\s*?\"" + f"{self.custom_item_name}" + r"\"[\s\S]*?})[\s\t\n]*?\"\d*?\""
+                script_expression = r"({[\s\t\n]*?\"name\"\s*?\"" + f"{self.custom_item_name}" + r"\"[\s\S]*?})[\s\t\n]*?\"\d*?\"\s*?{[\s\t\n]*?\"name\""
                 # Поиск скрипта предмета, на который заменяем
                 try:
                     custom_item_script = findall(script_expression, items_game_text, IGNORECASE)[0]
