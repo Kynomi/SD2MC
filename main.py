@@ -153,8 +153,8 @@ class MainApp(tkinter.Tk):
 
     def create_mods(self):
         mod_count = self.mod_items.mods_count()
-        next_script = 1
         for i in range(0, mod_count):
+            next_script = 1
             mod_name = self.mod_items.get_mod_name(i)
             custom_items, default_items = self.mod_items.get_mod(i)
             try:
