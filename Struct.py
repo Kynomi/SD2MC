@@ -258,7 +258,7 @@ class AddMods(ttk.Frame):
         self.mod_info.yscroll.configure(style='Arrowless.Vertical.scrollbar')
         self.mod_info.txt.configure(width=50, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'),
                                     foreground="#969698", background="#3d3d40")
-        #Combobox
+        #  Combobox
         self.mod_info_choose_mod = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.font', ('Roboto/Roboto_Bold.ttf', '20', 'bold'))
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.background', "#3d3d40")
@@ -266,7 +266,7 @@ class AddMods(ttk.Frame):
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.selectBackground', "#33393f")
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.selectForeground', "white")
         self.mod_info_choose_mod.bind("<<ComboboxSelected>>", self.reload_text)
-        #Style
+        #  Style
         self.style_checkbox_variable = tkinter.BooleanVar()
         self.style_checkbox = ttk.Checkbutton(self, text='Стиль', variable=self.style_checkbox_variable)
         self.style_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
@@ -291,9 +291,9 @@ class AddMods(ttk.Frame):
         mod_name_y = custom_item_y + margin + max(self.custom_item_label.winfo_reqheight(),
                                                   self.custom_item_field.winfo_reqheight())
         style_y = mod_name_y + margin + max(self.style_field.winfo_reqheight(),
-                                                  self.style_checkbox.winfo_reqheight())
+                                            self.style_checkbox.winfo_reqheight())
         confirm_button_y = style_y + margin + max(self.mod_name_label.winfo_reqheight(),
-                                                     self.mod_name_field.winfo_reqheight())
+                                                  self.mod_name_field.winfo_reqheight())
         labels_x = 15
         fields_x = max_text_width + 15 + labels_x
         add_mods_confirmation_button_size_x = fields_x - labels_x + self.mod_name_field.winfo_reqwidth()
@@ -430,6 +430,10 @@ class ConfigureMods(ttk.Frame):
         self.style_combobox_value = []
         self.custom_item_combobox_value = []
         self.default_item_combobox_value = []
+        self.default_item_combobox['value'] = []
+        self.custom_item_combobox['value'] = []
+        self.mod_name_combobox['value'] = []
+        self.style_combobox['value'] = []
         self.default_item_combobox.set('')
         self.custom_item_combobox.set('')
         self.mod_name_combobox.set('')
