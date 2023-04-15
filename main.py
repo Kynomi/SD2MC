@@ -1,6 +1,6 @@
 import re
 from tkinter import messagebox
-from re import findall, IGNORECASE, MULTILINE, sub
+from re import findall, IGNORECASE, MULTILINE
 from os import system, path, rename, remove, mkdir
 from shutil import move, rmtree, Error, make_archive
 from Struct import Styles, Mods, AddMods, ConfigureMods, SettingsFrame
@@ -14,7 +14,7 @@ def get_vpk_path():
     with open('config.yaml', 'r') as config:
         vpk_path = yaml.safe_load(config)
         vpk_path = vpk_path['vpk_path']
-    return(vpk_path)
+    return vpk_path
 
 
 def vpk_parse(vpk_path, export_file_path, output_path, output_name=None):
@@ -57,14 +57,13 @@ def config_check():
     """Функция проверяющая наличие конфигурационного файла и создающя его,
     Возвращает путь до ВПК"""
     if not path.exists('config.yaml'):
-        config = open('config.yaml', 'w')
         aReg = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
         aKey = winreg.OpenKey(aReg, r"Software\\Valve\\Steam\\")
         steam_path = winreg.QueryValueEx(aKey, 'SteamPath')[0]
         with open('config.yaml', 'w') as config:
             steam_path = steam_path.replace("/", "\\")
             vpk_path = {
-                'vpk_path' : f"{steam_path}\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"}
+                'vpk_path': f"{steam_path}\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"}
             yaml.dump(vpk_path, config)
             vpk_path = vpk_path['vpk_path']
     else:
@@ -104,7 +103,7 @@ class CreateMod:
         self.default_item_path = ''  # Путь до стандартной вещи
         self.particles = {}  # Партиклы
         self.mod_name = mod_name
-        if self.item_script_create() is not False:# Создание скрипта
+        if self.item_script_create() is not False:  # Создание скрипта
             output_name = self.default_item_path.split('/')[-1]  # Конечное имя vmdl файла
             # Преобразование пути до стандартной вещи в конечный путь для впк парсера
             self.default_item_path = self.default_item_path.split('/')
@@ -131,7 +130,7 @@ class CreateMod:
         # Регулярное выражение для поиска скрипта по названию предмета
         # ({[\s\t\n] * ?\"name\"\s*\"Shadow Fiend's Head\"[\s\S]*})[\s\t\n]*\"\d*?\"
         # \"нужное поле\"\s*\"([\s\S]*?)\" поиск любого аттрибута в скрипте
-        with open('items_game.txt', 'r', encoding='utf-8') as items_game: # Файл items_game
+        with open('items_game.txt', 'r', encoding='utf-8') as items_game:  # Файл items_game
             # Файл end_script
             with open(f'{self.mod_name}\\mor_scripts\\{self.script_name}.txt', 'w+', encoding='utf-8') as end_script_file:
                 items_game_text = items_game.read()  # Текст файла items_game
@@ -202,7 +201,7 @@ class CreateMod:
     def styles_script(text, style):
         styles = findall(r'^\s*?\"styles\"[\s\S]*?}\s*?}', text, MULTILINE)[0]
         styles_count = len(findall(r'\"\d*\"\s*{', styles))
-        new_model_exp = r'\"' + f'{style}' + '\"[\s\S]*?\"model_player\"\s*?\"([\s\S]*?)\"\s*?[\s\S]*?}'
+        new_model_exp = r'\"' + f'{style}' + r'\"[\s\S]*?\"model_player\"\s*?\"([\s\S]*?)\"\s*?[\s\S]*?}'
         new_model = findall(new_model_exp, styles)[0]
         old_model = findall(r'\"model_player\"\s*?\"([\s\S]*?)\"', text)[0]
         text = text.replace(styles, '')
@@ -211,8 +210,8 @@ class CreateMod:
             if i != style:
                 expression = r'\"asset[\s\S]*?\"[\s\S]*?\"style\"\s*?\"' + f'{i}' + r'\"[\s\S]*?}'
                 asset_modifiers_delete = findall(expression, text)
-                for i in asset_modifiers_delete:
-                    text = text.replace(i, '')
+                for delete in asset_modifiers_delete:
+                    text = text.replace(delete, '')
         if "alternate_icons" in text:
             icon_replace = findall(r'\"alternate_icons\"\s*?{\n[\s\S]*?}\s*?}', text)[0]
             text = text.replace(icon_replace, '')
@@ -274,14 +273,14 @@ class MainApp(tkinter.Tk):
 
     def change_tab(self, text):
         """функция изменяющая вкладку на выбранную пользователем"""
-        dict = {"Добавить моды": self.add_mods_frame,
+        tabs = {"Добавить моды": self.add_mods_frame,
                 "Изменить конфигурацию модов": self.change_mod_structure_frame,
                 "Настройки": self.settings_frame}
-        dict[self.active_tab].grid_forget()
+        tabs[self.active_tab].grid_forget()
         if text != "Настройки":
-            dict[text].grid(row=1, column=0, sticky='NSWE')
+            tabs[text].grid(row=1, column=0, sticky='NSWE')
         else:
-            dict[text].grid(row=1, column=0)
+            tabs[text].grid(row=1, column=0)
         self.active_tab = text
 
     def add_mods(self):
@@ -321,7 +320,6 @@ class MainApp(tkinter.Tk):
     def create_mods(self):
         """Функция создания модов из списка"""
         vpk_path = get_vpk_path()
-        mod_count = len(self.mods.mods)
         for mod_name, mod in self.mods.mods.items():
             next_script = 1
             for item in mod.items:
@@ -337,7 +335,7 @@ class MainApp(tkinter.Tk):
                     mkdir(mod_name + '\\mor_scripts')
                 print(f"now creating: {mod_name}, item: {custom_item}")
                 mod = CreateMod(default_item_name=default_item, custom_item_name=custom_item,
-                          mod_name=mod_name, script_number=next_script, vpk_path=vpk_path, style=style)
+                                mod_name=mod_name, script_number=next_script, vpk_path=vpk_path, style=style)
                 next_script = mod.script_name
             make_archive(mod_name, 'zip', mod_name)
             rmtree(mod_name)
