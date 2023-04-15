@@ -392,16 +392,16 @@ class ConfigureMods(ttk.Frame):
     def placing(self):
         """Функция располагающая элементы внутри вкладки"""
         # Placing objects in frame
-        self.mod_name_label.grid(row=0, column=0, sticky='W')
+        self.mod_name_label.grid(row=0, column=0, sticky='W', padx=15)
         self.mod_name_combobox.grid(row=0, column=1)
         self.mod_name_field.grid(row=0, column=2)
-        self.default_item_label.grid(row=1, column=0, sticky='W')
+        self.default_item_label.grid(row=1, column=0, sticky='W', padx=15)
         self.default_item_combobox.grid(row=1, column=1)
         self.default_item_field.grid(row=1, column=2)
-        self.custom_item_label.grid(row=2, column=0, sticky='W')
+        self.custom_item_label.grid(row=2, column=0, sticky='W', padx=15)
         self.custom_item_combobox.grid(row=2, column=1)
         self.custom_item_field.grid(row=2, column=2)
-        self.style_label.grid(row=3, column=0, sticky='W')
+        self.style_label.grid(row=3, column=0, sticky='W', padx=15)
         self.style_combobox.grid(row=3, column=1)
         self.style_field.grid(row=3, column=2)
         self.change_button.grid(row=4, column=0, columnspan=3)
