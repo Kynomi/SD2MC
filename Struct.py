@@ -144,8 +144,9 @@ class Mod:
         new_default_item = mod_info['new_default_item']
         new_custom_item = mod_info['new_custom_item']
         new_style = mod_info['new_style']
-        style_index = style.split('(')[0]
-        style = style.split('(')[1].replace(')', '')
+        if style is not None:
+            style_index = style.split('(')[0]
+            style = style.split('(')[1].replace(')', '')
         if style == 'None':
             style = None
         for item in self.items:
@@ -154,11 +155,14 @@ class Mod:
                     item.default_item = new_default_item
             if new_custom_item is not None:
                 if item.custom_item == custom_item:
-                    if item.custom_item != style_index:
-                        item.custom_item = new_custom_item
+                    if style is not None:
+                        if item.custom_item != style_index:
+                            item.custom_item = new_custom_item
+                        else:
+                            item.custom_item = new_custom_item
+                            item.style = new_style
                     else:
                         item.custom_item = new_custom_item
-                        item.style = new_style
             if new_style is not None:
                 if item.style == style and item.custom_item == style_index:
                     item.style = new_style
@@ -469,6 +473,8 @@ class ConfigureMods(ttk.Frame):
         default_item = self.default_item_combobox.get()
         custom_item = self.custom_item_combobox.get()
         style = self.style_combobox.get()
+        if style.strip() == '':
+            style = None
         self.clear_entry()
         return [mod_name, default_item, custom_item, style, new_mod_name, new_default_item, new_custom_item, new_style]
 
