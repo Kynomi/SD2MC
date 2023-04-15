@@ -1,8 +1,8 @@
-IF NOT EXIST venv (python -m venv venv/
+IF NOT EXIST venv (python3 -m venv venv/
 cd venv\scripts
 call activate.bat
 cd ../..
-pip install PyYAML
+pip3 install PyYAML
 python main.py
 ) ELSE (
 cd venv\scripts
