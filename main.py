@@ -1,12 +1,13 @@
 import re
 from tkinter import messagebox
 from re import findall, IGNORECASE, MULTILINE
-from os import system, path, rename, remove, mkdir
+from os import path, rename, remove, mkdir
 from shutil import move, rmtree, Error, make_archive
 from Struct import Styles, Mods, AddMods, ConfigureMods, SettingsFrame
 from Struct import tkinter, ttk
 import winreg
 import yaml
+from subprocess import call
 
 
 def get_vpk_path():
@@ -22,9 +23,9 @@ def vpk_parse(vpk_path, export_file_path, output_path, output_name=None):
     if '\\' in export_file_path:
         export_file_path = export_file_path.replace('\\', '/')
     file_name = export_file_path.split('/')[-1]  # Получение названия файла
-    output_path = path.abspath(output_path)  # Получение абсолютного выходного пути
+    output_path = path.abspath(output_path)
     decompiler_path = path.abspath('Decompiler/Decompiler.exe')  # Путь до дикомпилера
-    system(f'{decompiler_path} -i "{vpk_path}" -f "{export_file_path}" -o "{output_path}"')  # Вызов команды в командной строке для экспорта файла из ВПК
+    call(f'"{decompiler_path}" -i "{vpk_path}" -f "{export_file_path}" -o "{output_path}"')  # Вызов команды в командной строке для экспорта файла из ВПК
     start_path = path.abspath(output_path + '\\' + export_file_path)  # Стартовый путь нужен для перемещения файла из исходного положения в выходное
     #  Пермещение файла
     try:
