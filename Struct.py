@@ -477,12 +477,21 @@ class SettingsFrame(ttk.Frame):
     """Класс вкладки настроек"""
     def __init__(self, *args, **kwargs):
         super(SettingsFrame, self).__init__(*args, **kwargs)
-        self.vpk_path_label = ttk.Label(self, text='Введите путь до стима')
+        with open('config.yaml', 'r') as config:
+            vpk_path = yaml.safe_load(config)['vpk_path']
+        self.name_label = ttk.Label(self, text='Введите путь до доты')
         self.vpk_path_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
         self.confirm_button = ttk.Button(self, text="Применить настройки")
+        self.vpk_path_label = ttk.Label(self, text=vpk_path)
         self.placing()
 
     def placing(self):
-        self.vpk_path_label.grid(row=0, column=0, sticky=tkinter.W, pady=50)
+        self.name_label.grid(row=0, column=0, sticky=tkinter.W, pady=50)
         self.vpk_path_field.grid(row=0, column=1, padx=50, pady=50)
-        self.confirm_button.grid(row=1, column=0, columnspan=2)
+        self.vpk_path_label.grid(row=1, column=0, pady=50, columnspan=2)
+        self.confirm_button.grid(row=2, column=0, columnspan=3)
+
+    def reload(self):
+        with open('config.yaml', 'r') as config:
+            vpk_path = yaml.safe_load(config)['vpk_path']
+        self.vpk_path_label['text'] = vpk_path

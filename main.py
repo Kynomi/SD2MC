@@ -278,7 +278,10 @@ class MainApp(tkinter.Tk):
                 "Изменить конфигурацию модов": self.change_mod_structure_frame,
                 "Настройки": self.settings_frame}
         dict[self.active_tab].grid_forget()
-        dict[text].grid(row=1, column=0, sticky='NSWE')
+        if text != "Настройки":
+            dict[text].grid(row=1, column=0, sticky='NSWE')
+        else:
+            dict[text].grid(row=1, column=0)
         self.active_tab = text
 
     def add_mods(self):
@@ -309,9 +312,11 @@ class MainApp(tkinter.Tk):
         new_vpk_path = self.settings_frame.vpk_path_field.get()
         if '/' in new_vpk_path:
             new_vpk_path.replace('/', '\\')
-        new_vpk_path += 'steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk'
+        new_vpk_path = '\\'.join(new_vpk_path.split('\\')) + '\\'
+        new_vpk_path += 'game\\dota\\pak01_dir.vpk'
         with open('config.yaml', 'w', encoding='utf-8') as config:
             yaml.dump({'vpk_path': new_vpk_path}, config)
+        self.settings_frame.reload()
 
     def create_mods(self):
         """Функция создания модов из списка"""
