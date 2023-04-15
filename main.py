@@ -92,7 +92,10 @@ def check_files():
 class CreateMod:
     """Класс создания мода"""
     def __init__(self, default_item_name, custom_item_name, mod_name, script_number, vpk_path, style):
-        self.style = int(style) - 1
+        if style is not None:
+            self.style = int(style) - 1
+        else:
+            self.style = style
         self.script_name = f'script {script_number}'
         self.vpk_path = vpk_path
         self.default_item_name = default_item_name  # Название стандартной вещи
@@ -143,7 +146,6 @@ class CreateMod:
                 # Поиск пути до файла стандартной модели
                 try:
                     default_model_player_path = findall(model_path_expression, default_item_script, IGNORECASE)[0]
-                    print('default')
                 except IndexError:
                     return False
                 # Обновление регулярного выражения
@@ -211,8 +213,6 @@ class CreateMod:
                 asset_modifiers_delete = findall(expression, text)
                 for i in asset_modifiers_delete:
                     text = text.replace(i, '')
-        print(text)
-        print(styles)
         if "alternate_icons" in text:
             icon_replace = findall(r'\"alternate_icons\"\s*?{\n[\s\S]*?}\s*?}', text)[0]
             text = text.replace(icon_replace, '')
