@@ -1,9 +1,11 @@
 import tkinter
 from tkinter import ttk
-import winreg
+import yaml
+"""Это файл структуры проекта, здесь находятся классы вкладок и структур данных"""
 
 
 class Styles(ttk.Style):
+    """Класс стилей проекта"""
     def __init__(self, *args, **kwargs):
         super(Styles, self).__init__(*args, **kwargs)
         mystyle = super()
@@ -52,7 +54,7 @@ class Styles(ttk.Style):
                            [('Entry.border', {'border': '1', 'sticky': 'nswe', 'children':
                                [('Entry.padding', {'sticky': 'nswe', 'children':
                                    [('Entry.textarea', {'sticky': 'nswe'})]})]})]})]}})
-        mystyle.theme_use("MyAppStyle")
+        # TCombobox
         mystyle.theme_settings("MyAppStyle", settings={
             "Arrowless.Vertical.scrollbar": {"layout": [('Vertical.Scrollbar.trough', {'sticky': 'ns', 'children': [
                 ('Vertical.Scrollbar.thumb', {'sticky': 'nswe'})]})],
@@ -89,63 +91,126 @@ class Styles(ttk.Style):
         # Header
         mystyle.theme_settings("MyAppStyle", settings={
             'Header.TFrame': {"configure": {"background": "#2a2c2e"}}})
+        # TCheckButton
+        mystyle.theme_settings("MyAppStyle", settings={
+            'TCheckbutton': {"configure": {"font": ('Roboto/Roboto_Bold.ttf', '18', 'bold'),
+                                           "focuscolor": "#1f1f1f",
+                                           "background": "#1f1f1f",
+                                           "foreground": "#7e7e80",
+                                           "indicatorcolor": "#474748",
+                                           "shadecolor": "#474748",
+                                           'lightcolor': '#474748',
+                                           "relief": tkinter.FLAT,
+                                           "shiftrelief": tkinter.FLAT}}})
+        mystyle.theme_use("MyAppStyle")
 
 
-class ModItems:
+class Item:
+    """Класс предмета"""
+    def __init__(self, default_item, custom_item, style):
+        self.default_item = default_item
+        self.custom_item = custom_item
+        self.style = style
+
+    def __str__(self):
+        result = f'default_item: {self.default_item} '
+        result += f'custom_item: {self.custom_item} '
+        result += f'style: {self.style}'
+        return result
+
+
+class Mod:
+    """Класс мода"""
+    def __init__(self, mod_name):
+        self.mod_name = mod_name
+        self.items = []
+
+    def append_item(self, default_item, custom_item, style):
+        """Функция добавления предмета в мод"""
+        self.items.append(Item(default_item, custom_item, style))
+
+    def get_items(self):
+        """Функция возвращающая список предметов в моде"""
+        items = []
+        for item in self.items:
+            items.append([item.default_item, item.custom_item, item.style])
+        return items
+    
+    def change_mod(self, **mod_info):
+        """Функция отвечающая за изменение модификации"""
+        default_item = mod_info['default_item']
+        custom_item = mod_info['custom_item']
+        style = mod_info['style']
+        new_default_item = mod_info['new_default_item']
+        new_custom_item = mod_info['new_custom_item']
+        new_style = mod_info['new_style']
+        style_index = style.split('(')[0]
+        style = style.split('(')[1].replace(')', '')
+        if style == 'None':
+            style = None
+        for item in self.items:
+            if new_default_item is not None:
+                if item.default_item == default_item:
+                    item.default_item = new_default_item
+            if new_custom_item is not None:
+                if item.custom_item == custom_item:
+                    if item.custom_item != style_index:
+                        item.custom_item = new_custom_item
+                    else:
+                        item.custom_item = new_custom_item
+                        item.style = new_style
+            if new_style is not None:
+                if item.style == style and item.custom_item == style_index:
+                    item.style = new_style
+
+
+class Mods:
+    """Класс списка модов"""
     def __init__(self):
-        self.mod_names = []
-        self.custom_items = []
-        self.default_items = []
+        self.mods = {}
 
-    def add_items(self, mod_name, custom_items, default_items):
-        if mod_name not in self.mod_names:
-            self.mod_names.append(mod_name)
-            self.custom_items.append([custom_items])
-            self.default_items.append([default_items])
+    def append_mod(self, **mod_info):
+        """Добавляет мод в список модов"""
+        mod_name = mod_info['mod_name']
+        default_item = mod_info['default_item']
+        custom_item = mod_info['custom_item']
+        style = mod_info['style']
+        if mod_name in self.mods.keys():
+            self.mods[mod_name].append_item(default_item, custom_item, style)
         else:
-            index = self.mod_names.index(mod_name)
-            self.custom_items[index].append(custom_items)
-            self.default_items[index].append(default_items)
+            self.mods[mod_name] = Mod(mod_name)
+            self.mods[mod_name].append_item(default_item, custom_item, style)
 
-    def get_mod(self, index):
-        if type(index) == int:
-            index = index
-        elif type(index) == str:
-            index = self.mod_names.index(index)
-        else:
-            return None
-        return self.custom_items[index], self.default_items[index]
+    def reload(self):
+        """Возвращает список модов для обновления данных"""
+        mods = {}
+        for mod_name, mod in self.mods.items():
+            items = mod.get_items()
+            mods[mod_name] = items
+        return mods
 
-    def get_mod_name(self, index):
-        return self.mod_names[index]
-
-    def change_custom_item(self, old, new, mod_name):
-        index = self.mod_names.index(mod_name)
-        for i in self.custom_items[index]:
-            if i == old:
-                index_old = self.custom_items[index].index(i)
-                self.custom_items[index][index_old] = new
+    def change_mod(self, **mod_info):
+        """Функция отвечающая за изменение модификации"""
+        mod_name = mod_info['mod_name']
+        default_item = mod_info['default_item']
+        custom_item = mod_info['custom_item']
+        style = mod_info['style']
+        new_mod_name = mod_info['new_mod_name']
+        new_default_item = mod_info['new_default_item']
+        new_custom_item = mod_info['new_custom_item']
+        new_style = mod_info['new_style']
+        for key, mod in self.mods.items():
+            if key == mod_name:
+                mod.change_mod(default_item=default_item, custom_item=custom_item,
+                               style=style, new_default_item=new_default_item,
+                               new_custom_item=new_custom_item, new_style=new_style)
                 break
-
-    def change_default_item(self, old, new, mod_name):
-        index = self.mod_names.index(mod_name)
-        for i in self.default_items[index]:
-            if i == old:
-                index_old = self.default_items[index].index(i)
-                self.default_items[index][index_old] = new
-                break
-
-    def change_mod_name(self, old, new):
-        for i in range(0, len(self.mod_names)):
-            if self.mod_names[i] == old:
-                self.mod_names[i] = new
-                break
-
-    def mods_count(self):
-        return len(self.mod_names)
+        if new_mod_name is not None:
+            self.mods[new_mod_name] = self.mods.pop(mod_name)
 
 
 class ScrollTextBox(ttk.Frame):
+    """Класс содержит в себе виджет для отображения информации"""
     def __init__(self, *args, **kwargs):
         super(ScrollTextBox, self).__init__(*args, **kwargs)
         self.yscroll = ttk.Scrollbar(self, orient=tkinter.VERTICAL)
@@ -168,10 +233,11 @@ class ScrollTextBox(ttk.Frame):
 
 
 class AddMods(ttk.Frame):
+    """Вкладка добавления модов"""
     def __init__(self, *args, **kwargs):
         super(AddMods, self).__init__(*args, **kwargs)
         self.combobox_values = []
-        self.text_strings = []
+        self.strings = []
         # Lables
         self.standart_item_label = ttk.Label(self, text='Стандартная Вещь')
         self.custom_item_label = ttk.Label(self, text='Название вещи скина')
@@ -188,16 +254,22 @@ class AddMods(ttk.Frame):
         self.mod_info.yscroll.configure(style='Arrowless.Vertical.scrollbar')
         self.mod_info.txt.configure(width=50, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'),
                                     foreground="#969698", background="#3d3d40")
+        #Combobox
         self.mod_info_choose_mod = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.font', ('Roboto/Roboto_Bold.ttf', '20', 'bold'))
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.background', "#3d3d40")
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.foreground', "#9c9c9f")
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.selectBackground', "#33393f")
         self.mod_info_choose_mod.option_add('*TCombobox*Listbox.selectForeground', "white")
-        self.mod_info_choose_mod.bind("<<ComboboxSelected>>", self.combobox_current_value)
+        self.mod_info_choose_mod.bind("<<ComboboxSelected>>", self.reload_text)
+        #Style
+        self.style_checkbox_variable = tkinter.BooleanVar()
+        self.style_checkbox = ttk.Checkbutton(self, text='Стиль', variable=self.style_checkbox_variable)
+        self.style_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
         self.placing()
 
     def placing(self):
+        """Функция располагающая элементы внутри вкладки"""
         # Placing
         # mod_info_sizes
         self.mod_info.update()
@@ -214,7 +286,9 @@ class AddMods(ttk.Frame):
                             self.standart_item_field.winfo_reqheight()) + margin
         mod_name_y = custom_item_y + margin + max(self.custom_item_label.winfo_reqheight(),
                                                   self.custom_item_field.winfo_reqheight())
-        confirm_button_y = mod_name_y + margin + max(self.mod_name_label.winfo_reqheight(),
+        style_y = mod_name_y + margin + max(self.style_field.winfo_reqheight(),
+                                                  self.style_checkbox.winfo_reqheight())
+        confirm_button_y = style_y + margin + max(self.mod_name_label.winfo_reqheight(),
                                                      self.mod_name_field.winfo_reqheight())
         labels_x = 15
         fields_x = max_text_width + 15 + labels_x
@@ -229,185 +303,195 @@ class AddMods(ttk.Frame):
         self.standart_item_field.place(x=fields_x, y=0)
         self.custom_item_field.place(x=fields_x, y=custom_item_y)
         self.mod_name_field.place(x=fields_x, y=mod_name_y)
+        self.style_field.place(x=fields_x, y=style_y)
+        self.style_checkbox.place(x=labels_x, y=style_y)
         self.mod_info.place(x=mod_info_x, y=0)
         self.mod_info_choose_mod.place(x=mod_info_choose_mod_x, y=confirm_button_y)
 
-    def add_mod_info(self, new_mod_name, new_default_item, new_custom_item):
-        strings = f'{new_default_item} : {new_custom_item}'
-        if new_mod_name not in self.combobox_values:
-            self.combobox_values.append(new_mod_name)
-            self.text_strings.append([strings])
-            index = self.combobox_values.index(new_mod_name)
+    def get_entry(self):
+        """Функция возвращающая содержимое поле ввода"""
+        default_item = self.standart_item_field.get()
+        custom_item = self.custom_item_field.get()
+        mod_name = self.mod_name_field.get()
+        if self.style_checkbox_variable.get() == tkinter.TRUE:
+            style = self.style_field.get()
+            if style.strip() == '':
+                style = None
         else:
-            index = self.combobox_values.index(new_mod_name)
-            if strings not in self.text_strings[index]:
-                self.text_strings[index].append(strings)
-        self.mod_info_choose_mod.configure(values=self.combobox_values)
-        self.mod_info_choose_mod.current(index)
-        self.combobox_current_value()
+            style = None
 
-    def combobox_current_value(self, event=None):
+        return default_item, custom_item, mod_name, style
+
+    def clear_entry(self):
+        """Функция очищающая поля ввода"""
+        self.mod_name_field.delete(0, tkinter.END)
+        self.custom_item_field.delete(0, tkinter.END)
+        self.standart_item_field.delete(0, tkinter.END)
+        self.style_field.delete(0, tkinter.END)
+        self.mod_name_field.insert(0, self.mod_info_choose_mod.get())
+
+    def reload_text(self, event=None):
+        """Функция обновляющая текст окна информации"""
         selection = self.mod_info_choose_mod.get()
-        string = '\n'.join(self.text_strings[self.combobox_values.index(selection)])
+        string = self.strings[self.combobox_values.index(selection)]
         self.mod_info.txt.configure(state='normal')
         self.mod_info.txt.delete('0.0', tkinter.END)
         self.mod_info.txt.insert('end', string)
         self.mod_info.txt.configure(state='disabled')
 
-    def change_mod_info(self, new_mod_name_array, new_custom_item_array, new_default_item_array):
-        index = None
-        if new_mod_name_array is not None:
-            new_mod_name, old_mod_name = new_mod_name_array[0], new_mod_name_array[1]
-            for i in range(0, len(self.combobox_values)):
-                if self.combobox_values[i] == old_mod_name:
-                    self.combobox_values[i] = new_mod_name
-            self.mod_info_choose_mod['value'] = self.combobox_values
+    def reload(self, new_mod_name=None):
+        """Функция обновляющая информацию о модах в окне информации"""
+        self.combobox_values = []
+        self.strings = []
+        with open('mod_info.yaml', 'r') as mod_info:
+            mods = yaml.safe_load(mod_info)
+            for mod_name, items in mods.items():
+                self.combobox_values.append(mod_name)
+                string = ''
+                for item in items:
+                    default_item = item[0]
+                    custom_item = item[1]
+                    style = item[2]
+                    string += f'{default_item}:{custom_item}'
+                    if style is not None:
+                        string += f'({style})\n'
+                    else:
+                        string += '\n'
+                self.strings.append(string)
+        self.mod_info_choose_mod.configure(values=self.combobox_values)
+        if new_mod_name is not None:
             self.mod_info_choose_mod.current(self.combobox_values.index(new_mod_name))
-        if new_custom_item_array is not None:
-            new_custom_item, old_custom_item = new_custom_item_array
-            for i in range (0, len(self.text_strings)):
-                for j in range(0, len(self.text_strings[i])):
-                    default_item, custom_item = self.text_strings[i][j].split(':')
-                    default_item = default_item.strip(' ')
-                    custom_item = custom_item.strip(' ')
-                    print(old_custom_item, custom_item)
-                    if old_custom_item == custom_item:
-                        custom_item = new_custom_item
-                        self.text_strings[i][j] = f'{default_item}:{custom_item}'
-                        break
-        if new_default_item_array is not None:
-            new_default_item, old_default_item = new_default_item_array
-            for i in range(0, len(self.text_strings)):
-                for j in range(0, len(self.text_strings[i])):
-                    default_item, custom_item = self.text_strings[i][j].split(':')
-                    default_item = default_item.strip(' ')
-                    custom_item = custom_item.strip(' ')
-                    if old_default_item == default_item:
-                        default_item = new_default_item
-                        self.text_strings[i][j] = f'{default_item}:{custom_item}'
-                        break
-        self.combobox_current_value()
-
-    def clear_entry(self):
-        self.mod_name_field.delete(0, tkinter.END)
-        self.custom_item_field.delete(0, tkinter.END)
-        self.standart_item_field.delete(0, tkinter.END)
-        self.mod_name_field.insert(0, self.mod_info_choose_mod.get())
+        self.reload_text()
+        self.clear_entry()
 
 
 class ConfigureMods(ttk.Frame):
+    """Класс вкладки конфигурации модов"""
     def __init__(self, *args, **kwargs):
         super(ConfigureMods, self).__init__(*args, **kwargs)
         self.mod_name_combobox_value = []
         self.default_item_combobox_value = []
         self.custom_item_combobox_value = []
-        self.mod_name_label = ttk.Label(self, text="Название модификации")
-        self.mod_name_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
-        self.mod_name_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
-        self.default_item_label = ttk.Label(self, text="Название стандартной вещи")
-        self.default_item_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
-        self.default_item_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
-        self.custom_item_label = ttk.Label(self, text="Название скина")
-        self.custom_item_combobox = ttk.Combobox(self, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
-        self.custom_item_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
-        self.change_button = ttk.Button(self, text='Изменить конфигурацию мода', command=self.change_mod)
-        self.mod_name_combobox.bind('<<ComboboxSelected>>', self.current_combobox_value)
+        self.style_combobox_value = []
+        self.mod_name_label = ttk.Label(self, text="Модификация")
+        self.mod_name_combobox = ttk.Combobox(self, width=32, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
+        self.mod_name_field = ttk.Entry(self, width=19, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
+        self.default_item_label = ttk.Label(self, text="Стандартная вещи")
+        self.default_item_combobox = ttk.Combobox(self, width=32, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
+        self.default_item_field = ttk.Entry(self, width=19, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
+        self.custom_item_label = ttk.Label(self, text="Скин")
+        self.custom_item_combobox = ttk.Combobox(self, width=32, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
+        self.custom_item_field = ttk.Entry(self, width=19, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
+        self.style_field = ttk.Entry(self, width=19, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
+        self.style_label = ttk.Label(self, text="Стиль")
+        self.style_combobox = ttk.Combobox(self,  width=32, font=('Roboto/Roboto_Bold.ttf', '20', 'bold'), state='readonly')
+        self.change_button = ttk.Button(self, text='Изменить конфигурацию мода')
+        self.mod_name_combobox.bind('<<ComboboxSelected>>', self.combobox_reload)
         self.placing()
 
     def placing(self):
+        """Функция располагающая элементы внутри вкладки"""
         # Placing objects in frame
-        self.mod_name_label.grid(row=0, column=0)
-        self.mod_name_combobox.grid(row=1, column=0, pady=50)
-        self.mod_name_field.grid(row=2, column=0)
-        self.default_item_label.grid(row=0, column=1, padx=25)
-        self.default_item_combobox.grid(row=1, column=1, pady=50, padx=25)
-        self.default_item_field.grid(row=2, column=1, padx=25)
-        self.custom_item_label.grid(row=0, column=2)
-        self.custom_item_combobox.grid(row=1, column=2, pady=50)
+        self.mod_name_label.grid(row=0, column=0, sticky='W', padx=15)
+        self.mod_name_combobox.grid(row=0, column=1)
+        self.mod_name_field.grid(row=0, column=2)
+        self.default_item_label.grid(row=1, column=0, sticky='W', padx=15)
+        self.default_item_combobox.grid(row=1, column=1)
+        self.default_item_field.grid(row=1, column=2)
+        self.custom_item_label.grid(row=2, column=0, sticky='W', padx=15)
+        self.custom_item_combobox.grid(row=2, column=1)
         self.custom_item_field.grid(row=2, column=2)
-        self.change_button.grid(row=3, column=0, columnspan=3, pady=(50, 0))
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
-        self.grid_rowconfigure(2, weight=1)
-        self.grid_rowconfigure(3, weight=1)
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
+        self.style_label.grid(row=3, column=0, sticky='W', padx=15)
+        self.style_combobox.grid(row=3, column=1)
+        self.style_field.grid(row=3, column=2)
+        self.change_button.grid(row=4, column=0, columnspan=3)
+        self.grid_rowconfigure(0, weight=1, pad=35)
+        self.grid_rowconfigure(1, weight=1, pad=35)
+        self.grid_rowconfigure(2, weight=1, pad=35)
+        self.grid_rowconfigure(3, weight=1, pad=35)
+        self.grid_rowconfigure(4, weight=1, pad=35)
+        self.grid_columnconfigure(0, weight=1, pad=25)
+        self.grid_columnconfigure(1, weight=1, pad=25)
         self.grid_columnconfigure(2, weight=1)
 
-    def change_mod(self):
-        change_mod_name = None
-        change_custom_item = None
-        change_default_item = None
-        new_mod_name = self.mod_name_field.get()
-        new_custom_item = self.custom_item_field.get()
-        new_default_item = self.default_item_field.get()
-        old_mod_name = self.mod_name_combobox.get()
-        old_custom_item = self.custom_item_combobox.get()
-        old_default_item = self.default_item_combobox.get()
-        mod_name = old_mod_name
-        if old_mod_name != '':
-            index = self.mod_name_combobox_value.index(old_mod_name)
-            if new_custom_item.replace(' ', '') != '':
-                index_in = self.custom_item_combobox_value[index].index(old_custom_item)
-                self.custom_item_combobox_value[index][index_in] = new_custom_item
-                change_custom_item = [new_custom_item, old_custom_item]
-            if new_default_item.replace(' ', '') != '':
-                index_in = self.default_item_combobox_value[index].index(old_default_item)
-                self.default_item_combobox_value[index][index_in] = new_default_item
-                change_default_item = [new_default_item, old_default_item]
-            if old_mod_name != new_mod_name and new_mod_name.replace(' ', '') != '':
-                self.mod_name_combobox_value[index] = new_mod_name
-                change_mod_name = [new_mod_name, old_mod_name]
-                mod_name = new_mod_name
-            self.mod_name_combobox['value'] = self.mod_name_combobox_value
-            self.mod_name_combobox.current(index)
-            self.current_combobox_value()
-        return change_mod_name, change_custom_item, change_default_item, mod_name
-
-    def add_mod_info(self, mod_name, custom_item, default_item):
-        if mod_name not in self.mod_name_combobox_value:
-            self.mod_name_combobox_value.append(mod_name)
-            index = self.mod_name_combobox_value.index(mod_name)
-            self.custom_item_combobox_value.append([custom_item])
-            self.default_item_combobox_value.append([default_item])
-        else:
-            index = self.mod_name_combobox_value.index(mod_name)
-            self.custom_item_combobox_value[index].append(custom_item)
-            self.default_item_combobox_value[index].append(default_item)
-        self.mod_name_combobox['value'] = self.mod_name_combobox_value
-        self.mod_name_combobox.current(index)
-        self.current_combobox_value()
-
-    def current_combobox_value(self, event=None):
-        mod_name = self.mod_name_combobox.get()
-        index = self.mod_name_combobox_value.index(mod_name)
-        self.custom_item_combobox['value'] = self.custom_item_combobox_value[index]
-        self.default_item_combobox['value'] = self.default_item_combobox_value[index]
-        self.custom_item_combobox.current(0)
-        self.default_item_combobox.current(0)
-
     def clear_entry(self):
+        """Функция очищающая поля ввода"""
         self.mod_name_field.delete(0, tkinter.END)
         self.custom_item_field.delete(0, tkinter.END)
         self.default_item_field.delete(0, tkinter.END)
+        self.style_field.delete(0, tkinter.END)
+
+    def reload(self):
+        self.mod_name_combobox_value = []
+        self.style_combobox_value = []
+        self.custom_item_combobox_value = []
+        self.default_item_combobox_value = []
+        self.default_item_combobox.set('')
+        self.custom_item_combobox.set('')
+        self.mod_name_combobox.set('')
+        self.style_combobox.set('')
+        with open('mod_info.yaml', 'r') as mod_info:
+            mods = yaml.safe_load(mod_info)
+            for mod_name, mod in mods.items():
+                self.mod_name_combobox_value.append(mod_name)
+                mod_default_items = []
+                mod_custom_items = []
+                mod_styles = []
+                for items in mod:
+                    mod_default_items.append(items[0])
+                    mod_custom_items.append(items[1])
+                    mod_styles.append(f'{items[1]}({items[2]})')
+                self.default_item_combobox_value.append(mod_default_items)
+                self.custom_item_combobox_value.append(mod_custom_items)
+                self.style_combobox_value.append(mod_styles)
+        self.mod_name_combobox.configure(values=self.mod_name_combobox_value)
+
+    def combobox_reload(self, event=None):
+        index = self.mod_name_combobox_value.index(self.mod_name_combobox.get())
+        self.default_item_combobox.configure(values=self.default_item_combobox_value[index])
+        self.custom_item_combobox.configure(values=self.custom_item_combobox_value[index])
+        self.style_combobox.configure(values=self.style_combobox_value[index])
+
+    def get_entry(self):
+        new_mod_name = self.mod_name_field.get()
+        new_default_item = self.default_item_field.get()
+        new_custom_item = self.custom_item_field.get()
+        new_style = self.style_field.get()
+        if new_mod_name.strip() == '':
+            new_mod_name = None
+        if new_default_item.strip() == '':
+            new_default_item = None
+        if new_custom_item.strip() == '':
+            new_custom_item = None
+        if new_style.strip() == '':
+            new_style = None
+        mod_name = self.mod_name_combobox.get()
+        default_item = self.default_item_combobox.get()
+        custom_item = self.custom_item_combobox.get()
+        style = self.style_combobox.get()
+        self.clear_entry()
+        return [mod_name, default_item, custom_item, style, new_mod_name, new_default_item, new_custom_item, new_style]
 
 
 class SettingsFrame(ttk.Frame):
+    """Класс вкладки настроек"""
     def __init__(self, *args, **kwargs):
         super(SettingsFrame, self).__init__(*args, **kwargs)
-        self.vpk_path_label = ttk.Label(self, text='Введите путь до стима')
+        with open('config.yaml', 'r') as config:
+            vpk_path = yaml.safe_load(config)['vpk_path']
+        self.name_label = ttk.Label(self, text='Введите путь до доты')
         self.vpk_path_field = ttk.Entry(self, width=20, font=('Roboto/Roboto_Bold.ttf', '18', 'bold'))
         self.confirm_button = ttk.Button(self, text="Применить настройки")
+        self.vpk_path_label = ttk.Label(self, text=vpk_path)
         self.placing()
 
     def placing(self):
-        self.vpk_path_label.grid(row=0, column=0, sticky=tkinter.W, pady=50)
+        self.name_label.grid(row=0, column=0, sticky=tkinter.W, pady=50)
         self.vpk_path_field.grid(row=0, column=1, padx=50, pady=50)
-        self.confirm_button.grid(row=1, column=0, columnspan=2)
+        self.vpk_path_label.grid(row=1, column=0, pady=50, columnspan=2)
+        self.confirm_button.grid(row=2, column=0, columnspan=3)
 
-    def confirm_settings(self):
-        path = self.vpk_path_field.get().replace('/', '\\') + "\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"
-        with open('config.py', 'w') as config:
-            config.write(f'vpk_path = "{path}"')
-            config.close()
-        return path
+    def reload(self):
+        with open('config.yaml', 'r') as config:
+            vpk_path = yaml.safe_load(config)['vpk_path']
+        self.vpk_path_label['text'] = vpk_path
