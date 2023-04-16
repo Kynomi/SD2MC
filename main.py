@@ -175,13 +175,12 @@ class CreateMod:
                     custom_item_item_name = findall(custom_item_item_name_exp, items_russian_text, IGNORECASE)[0]
                     print(custom_item_item_name, item_name_tag)
                     custom_item_script = custom_item_script.replace('#' + item_name_tag, custom_item_item_name)
-                    # Изменения описания вещи
-                    custom_item_description_tag = findall(custom_item_description_tag_expression, custom_item_script, IGNORECASE)[0]
-                    custom_item_description_tag = custom_item_description_tag.replace('#', '')
-                    # Поиск описания вещи
                     # "DOTA_Bundle_Assemblage_of_Announcers_Pack"        "Комплект «Собрание комментаторов»"
-                    custom_item_description_expression = rf"\"{custom_item_description_tag}\"\s*?\"([\s\S]*?)\""
                     try:
+                        # Поиск описания вещи
+                        custom_item_description_tag = findall(custom_item_description_tag_expression, custom_item_script, IGNORECASE)[0]
+                        custom_item_description_tag = custom_item_description_tag.replace('#', '')
+                        custom_item_description_expression = rf"\"{custom_item_description_tag}\"\s*?\"([\s\S]*?)\""
                         custom_item_description = findall(custom_item_description_expression, items_russian_text, IGNORECASE)[0]
                         del custom_item_description_tag_expression
                         custom_item_script = custom_item_script.replace('#' + custom_item_description_tag, custom_item_description)
