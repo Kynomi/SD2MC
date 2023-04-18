@@ -322,17 +322,17 @@ class MainApp(tkinter.Tk):
         vpk_path = get_vpk_path()
         for mod_name, mod in self.mods.mods.items():
             next_script = 1
+            try:
+                mkdir(mod_name)
+                mkdir(mod_name + '\\mor_scripts')
+            except FileExistsError:
+                rmtree(mod_name)
+                mkdir(mod_name)
+                mkdir(mod_name + '\\mor_scripts')
             for item in mod.items:
                 default_item = item.default_item
                 custom_item = item.custom_item
                 style = item.style
-                try:
-                    mkdir(mod_name)
-                    mkdir(mod_name + '\\mor_scripts')
-                except FileExistsError:
-                    rmtree(mod_name)
-                    mkdir(mod_name)
-                    mkdir(mod_name + '\\mor_scripts')
                 print(f"now creating: {mod_name}, item: {custom_item}")
                 mod = CreateMod(default_item_name=default_item, custom_item_name=custom_item,
                                 mod_name=mod_name, script_number=next_script, vpk_path=vpk_path, style=style)
