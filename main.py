@@ -199,13 +199,16 @@ class CreateMod:
 
     @staticmethod
     def styles_script(text, style):
-        styles = findall(r'^\s*?\"styles\"[\s\S]*?}\s*?}', text, MULTILINE)[0]
+        styles = findall(r'^\s*?\"styles\"[\s\S]*?^\t\t\t\t}', text, MULTILINE)[0]
         styles_count = len(findall(r'\"\d*\"\s*{', styles))
         new_model_exp = r'\"' + f'{style}' + r'\"[\s\S]*?\"model_player\"\s*?\"([\s\S]*?)\"\s*?[\s\S]*?}'
-        new_model = findall(new_model_exp, styles)[0]
-        old_model = findall(r'\"model_player\"\s*?\"([\s\S]*?)\"', text)[0]
-        text = text.replace(styles, '')
-        text = text.replace(old_model, new_model)
+        try:
+            new_model = findall(new_model_exp, styles)[0]
+            old_model = findall(r'\"model_player\"\s*?\"([\s\S]*?)\"', text)[0]
+            text = text.replace(styles, '')
+            text = text.replace(old_model, new_model)
+        except IndexError:
+            text = text.replace(styles, '')
         for i in range(0, styles_count):
             if i != style:
                 expression = r'\"asset[\s\S]*?\"[\s\S]*?\"style\"\s*?\"' + f'{i}' + r'\"[\s\S]*?}'
