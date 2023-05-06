@@ -1,4 +1,5 @@
 # Byte-compiled / optimized / DLL files
+.idea
 __pycache__/
 *.py[cod]
 *$py.class
@@ -117,6 +118,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+venv
 
 #My ignore
 items_game.txt

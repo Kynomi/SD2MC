@@ -9,6 +9,8 @@ import winreg
 import yaml
 from subprocess import call
 
+class ParseError(Exception):
+    pass
 
 def get_vpk_path():
     """Эта функция получает путь до ВПК файла"""
@@ -36,7 +38,11 @@ def vpk_parse(vpk_path, export_file_path, output_path, output_name=None):
     #  Переименование файла
     if output_name is not None:
         if not output_name.replace(' ', '') == '':
-            rename(output_path + '\\' + file_name, output_path + '\\' + output_name)
+            try:
+                rename(output_path + '\\' + file_name, output_path + '\\' + output_name)
+            except FileExistsError:
+                remove(output_path + '\\' + output_name)
+                rename(output_path + '\\' + file_name, output_path + '\\' + output_name)
     # удаление мусора после экспорта
     rmtree_name = output_path + '\\' + export_file_path.split('/')[0]
     if path.exists(rmtree_name):
@@ -104,27 +110,23 @@ class CreateMod:
         self.default_item_path = ''  # Путь до стандартной вещи
         self.particles = {}  # Партиклы
         self.mod_name = mod_name
-        if self.item_script_create() is not False:  # Создание скрипта
-            output_name = self.default_item_path.split('/')[-1]  # Конечное имя vmdl файла
-            # Преобразование пути до стандартной вещи в конечный путь для впк парсера
-            self.default_item_path = self.default_item_path.split('/')
-            self.default_item_path = '/'.join(self.default_item_path[:-1])
-            output_path = mod_name + "\\" + self.default_item_path
-            # Парс вещи для мода
-            vpk_parse(export_file_path=self.custom_item_path, output_path=output_path, output_name=output_name, vpk_path=self.vpk_path)
-            # Парс партиклов для мода
-            for original_particle, new_particle in self.particles.items():
-                new_particle = new_particle + '_c'
-                output_particle_path = original_particle.split('/')
-                output_particle_path = '\\'.join(output_particle_path[:-1])
-                output_particle_path = mod_name + "\\" + output_particle_path
-                output_particle_name = original_particle.split('/')[-1] + '_c'
-                vpk_parse(export_file_path=new_particle, output_path=output_particle_path, output_name=output_particle_name, vpk_path=self.vpk_path)
+        self.item_script_create()
+        output_name = self.default_item_path.split('/')[-1]  # Конечное имя vmdl файла
+        # Преобразование пути до стандартной вещи в конечный путь для впк парсера
+        self.default_item_path = self.default_item_path.split('/')
+        self.default_item_path = '/'.join(self.default_item_path[:-1])
+        output_path = mod_name + "\\" + self.default_item_path
+        # Парс вещи для мода
+        vpk_parse(export_file_path=self.custom_item_path, output_path=output_path, output_name=output_name, vpk_path=self.vpk_path)
+        # Парс партиклов для мода
+        for original_particle, new_particle in self.particles.items():
+            new_particle = new_particle + '_c'
+            output_particle_path = original_particle.split('/')
+            output_particle_path = '\\'.join(output_particle_path[:-1])
+            output_particle_path = mod_name + "\\" + output_particle_path
+            output_particle_name = original_particle.split('/')[-1] + '_c'
+            vpk_parse(export_file_path=new_particle, output_path=output_particle_path, output_name=output_particle_name, vpk_path=self.vpk_path)
             self.script_name = script_number + 1
-        else:
-            remove(f'{self.mod_name}\\mor_scripts\\{self.script_name}.txt')
-            print(f'{self.custom_item_name} не был создан')
-            script_name = script_number
 
     def item_script_create(self):
         """Функция генерирующая скрипты для мода"""
@@ -141,30 +143,30 @@ class CreateMod:
                 model_path_expression = rf'\"model_player\"\s*\"([\s\S]*?)\"'
                 custom_item_description_tag_expression = rf'\"item_description\"\s*\"([\s\S]*?)\"'
                 item_name_expression = r'\"item_name\"\s*\"([\s\S]*?)\"'
-                # Поиск скрипта стандартного предмета
-                default_item_script = findall(script_expression, items_game_text, IGNORECASE)[0]
-                # Поиск пути до файла стандартной модели
+                item_rarity_expression = r'\"prefab\"\s*\"([\s\S]*?)\"'
                 try:
+                    # Поиск скрипта стандартного предмета
+                    default_item_script = findall(script_expression, items_game_text, IGNORECASE)[0]
+                except IndexError:
+                    raise ParseError(f'{self.default_item_name} не существует')
+                try:
+                    # Поиск пути до файла стандартной модели
                     default_model_player_path = findall(model_path_expression, default_item_script, IGNORECASE)[0]
                 except IndexError:
-                    return False
+                    raise ParseError(f'У {self.default_item_name} нет ссылки на модель')
                 # Обновление регулярного выражения
                 script_expression = r"({\s*\"name\"\s*?\"" + f"{self.custom_item_name}" + r"\"[\s\S]*?)\s*?\"\d*?\"\s*?\t\t{\s*?^\t\t\t\"name\""
                 # Поиск скрипта предмета, на который заменяем
                 try:
                     custom_item_script = findall(script_expression, items_game_text, IGNORECASE+MULTILINE)[0]
                 except IndexError:
-                    return False
+                    raise ParseError(f'{self.custom_item_name} не существует')
                 if self.style is not None:
                     custom_item_script = self.styles_script(custom_item_script, self.style)
-                del script_expression
                 # Поиск пути до модели, на которую будем заменять
                 custom_item_model_player_path = findall(model_path_expression, custom_item_script, IGNORECASE)[0]
-                del model_path_expression
+                default_item_prefab = findall(item_rarity_expression, default_item_script, IGNORECASE + MULTILINE)[0]
                 # Замены строк в скрипте
-                custom_item_script = custom_item_script.replace('wearable', 'default_item')
-                custom_item_script = custom_item_script.replace(self.custom_item_name, self.default_item_name)
-                custom_item_script = custom_item_script.replace(custom_item_model_player_path, default_model_player_path)
                 # Поиск тега для поиска названия кастомного предмета
                 with open('items_russian.txt', 'r', encoding='utf-8') as items_russian:  # Файл items_russian
                     items_russian_text = items_russian.read()  # Текст файла items_russian
@@ -173,8 +175,11 @@ class CreateMod:
                     item_name_tag = item_name_tag.replace('#', '')
                     custom_item_item_name_exp = rf"\"{item_name_tag}\"\s*?\"([\s\S]*?)\""
                     custom_item_item_name = findall(custom_item_item_name_exp, items_russian_text, IGNORECASE)[0]
-                    print(custom_item_item_name, item_name_tag)
                     custom_item_script = custom_item_script.replace('#' + item_name_tag, custom_item_item_name)
+                    custom_item_script = custom_item_script.replace('wearable', default_item_prefab)
+                    custom_item_script = custom_item_script.replace(self.custom_item_name, self.default_item_name)
+                    custom_item_script = custom_item_script.replace(custom_item_model_player_path, default_model_player_path)
+                    print(custom_item_item_name, item_name_tag)
                     # "DOTA_Bundle_Assemblage_of_Announcers_Pack"        "Комплект «Собрание комментаторов»"
                     try:
                         # Поиск описания вещи
@@ -337,9 +342,12 @@ class MainApp(tkinter.Tk):
                 custom_item = item.custom_item
                 style = item.style
                 print(f"now creating: {mod_name}, item: {custom_item}")
-                mod = CreateMod(default_item_name=default_item, custom_item_name=custom_item,
+                try:
+                    mod = CreateMod(default_item_name=default_item, custom_item_name=custom_item,
                                 mod_name=mod_name, script_number=next_script, vpk_path=vpk_path, style=style)
-                next_script = mod.script_name
+                    next_script += 1
+                except ParseError as pe:
+                    print(f'{pe.args[0]}')
             make_archive(mod_name, 'zip', mod_name)
             rmtree(mod_name)
         messagebox.showinfo('Мод статус', 'Модификации были успешно созданы')
