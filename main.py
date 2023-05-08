@@ -126,7 +126,6 @@ class CreateMod:
             output_particle_path = mod_name + "\\" + output_particle_path
             output_particle_name = original_particle.split('/')[-1] + '_c'
             vpk_parse(export_file_path=new_particle, output_path=output_particle_path, output_name=output_particle_name, vpk_path=self.vpk_path)
-            self.script_name = script_number + 1
 
     def item_script_create(self):
         """Функция генерирующая скрипты для мода"""
@@ -329,7 +328,7 @@ class MainApp(tkinter.Tk):
         """Функция создания модов из списка"""
         vpk_path = get_vpk_path()
         for mod_name, mod in self.mods.mods.items():
-            next_script = 1
+            script_nubmer = 1
             try:
                 mkdir(mod_name)
                 mkdir(mod_name + '\\mor_scripts')
@@ -344,8 +343,8 @@ class MainApp(tkinter.Tk):
                 print(f"now creating: {mod_name}, item: {custom_item}")
                 try:
                     mod = CreateMod(default_item_name=default_item, custom_item_name=custom_item,
-                                mod_name=mod_name, script_number=next_script, vpk_path=vpk_path, style=style)
-                    next_script += 1
+                                mod_name=mod_name, script_number=script_nubmer, vpk_path=vpk_path, style=style)
+                    script_nubmer += 1
                 except ParseError as pe:
                     print(f'{pe.args[0]}')
             make_archive(mod_name, 'zip', mod_name)
