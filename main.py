@@ -9,8 +9,10 @@ import winreg
 import yaml
 from subprocess import call
 
+
 class ParseError(Exception):
     pass
+
 
 def get_vpk_path():
     """Эта функция получает путь до ВПК файла"""
@@ -143,6 +145,7 @@ class CreateMod:
                 custom_item_description_tag_expression = rf'\"item_description\"\s*\"([\s\S]*?)\"'
                 item_name_expression = r'\"item_name\"\s*\"([\s\S]*?)\"'
                 item_rarity_expression = r'\"prefab\"\s*\"([\s\S]*?)\"'
+                item_slot_expression = r'\"item_slot\"\s*\"([\s\S]*?)\"'
                 try:
                     # Поиск скрипта стандартного предмета
                     default_item_script = findall(script_expression, items_game_text, IGNORECASE)[0]
@@ -168,6 +171,8 @@ class CreateMod:
                 # Замены строк в скрипте
                 # Поиск тега для поиска названия кастомного предмета
                 with open('items_russian.txt', 'r', encoding='utf-8') as items_russian:  # Файл items_russian
+                    item_slot_default = findall(item_slot_expression, default_item_script, flags=IGNORECASE)[0]
+                    item_slot_custom = findall(item_slot_expression, custom_item_script, flags=IGNORECASE)[0]
                     items_russian_text = items_russian.read()  # Текст файла items_russian
                     # Изменение названия предмета
                     item_name_tag = findall(item_name_expression, custom_item_script)[0]
@@ -178,6 +183,7 @@ class CreateMod:
                     custom_item_script = custom_item_script.replace('wearable', default_item_prefab)
                     custom_item_script = custom_item_script.replace(self.custom_item_name, self.default_item_name)
                     custom_item_script = custom_item_script.replace(custom_item_model_player_path, default_model_player_path)
+                    custom_item_script = custom_item_script.replace(item_slot_custom, item_slot_default)
                     print(custom_item_item_name, item_name_tag)
                     # "DOTA_Bundle_Assemblage_of_Announcers_Pack"        "Комплект «Собрание комментаторов»"
                     try:
