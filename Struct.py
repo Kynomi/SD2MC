@@ -314,9 +314,9 @@ class AddMods(ttk.Frame):
 
     def get_entry(self):
         """Функция возвращающая содержимое поле ввода"""
-        default_item = self.standart_item_field.get()
-        custom_item = self.custom_item_field.get()
-        mod_name = self.mod_name_field.get()
+        default_item = self.standart_item_field.get().strip()
+        custom_item = self.custom_item_field.get().strip()
+        mod_name = self.mod_name_field.get().strip()
         if self.style_checkbox_variable.get() == tkinter.TRUE:
             style = self.style_field.get()
             if style.strip() == '':

@@ -221,7 +221,7 @@ class CreateMod:
             text = text.replace(styles, '')
         for i in range(0, styles_count):
             if i != style:
-                expression = r'\"asset[\s\S]*?\"[\s\S]*?\"style\"\s*?\"' + f'{i}' + r'\"[\s\S]*?}'
+                expression = r'\"asset[^}]*?\"[^}]*?\"style\"\s*?\"' + f'{i}' + r'\"[^}]*?}'
                 asset_modifiers_delete = findall(expression, text)
                 for delete in asset_modifiers_delete:
                     text = text.replace(delete, '')
