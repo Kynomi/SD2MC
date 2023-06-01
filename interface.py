@@ -141,13 +141,11 @@ def create_mods(sender, app_data, user_data):
             try:
                 CreateMod(default_item, custom_item, mod_name, script_number, vpk_path, style)
                 script_number += 1
-                make_archive(mod_name, 'zip', mod_name)
             except ParseError:
                 print(f'{mod_name} create failed')
-            finally:
-                if path.isdir(mod_name):
-                    rmtree(mod_name)
-
+        make_archive(mod_name, 'zip', mod_name)
+        if path.isdir(mod_name):
+            rmtree(mod_name)
 
 def main_app():
     mods = Mods()

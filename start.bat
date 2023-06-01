@@ -3,10 +3,11 @@ cd venv\scripts
 call activate.bat
 cd ../..
 pip install PyYAML
-python main.py
+pip install dearpygui
+python __init__.py
 ) ELSE (
 cd venv\scripts
 call activate.bat
 cd ../..
-python main.py
+python __init__.py
 )
