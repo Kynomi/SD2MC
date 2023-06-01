@@ -10,6 +10,9 @@ class Item:
         self.custom_item = custom_item
         self.style = style
 
+    def get_item(self):
+        return self.default_item, self.custom_item, self.style
+
     def __str__(self):
         result = f'default_item: {self.default_item} '
         result += f'custom_item: {self.custom_item} '
@@ -35,6 +38,11 @@ class Mod:
             items.append([item.default_item, item.custom_item, item.style])
         return items
 
+    def delete_style(self, custom_item):
+        for i in self.items:
+            if i.get_item()[1] == custom_item:
+                i.style = None
+
     def change_mod(self, **mod_info):
         """Функция отвечающая за изменение модификации"""
         default_item = mod_info['default_item']
@@ -46,7 +54,7 @@ class Mod:
         if style is not None:
             style_index = style.split('(')[0]
             style = style.split('(')[1].replace(')', '')
-        if style == 'None':
+        elif style == 'None':
             style = None
         for item in self.items:
             if new_default_item is not None:
@@ -85,7 +93,7 @@ class Mods:
             self.mods[mod_name] = Mod(mod_name)
             self.mods[mod_name].append_item(default_item, custom_item, style)
 
-    def reload(self):
+    def get_mods(self):
         """Возвращает список модов для обновления данных"""
         mods = {}
         for mod_name, mod in self.mods.items():
@@ -116,6 +124,13 @@ class Mods:
                 break
         if new_mod_name is not None:
             self.mods[new_mod_name] = self.mods.pop(mod_name)
+
+    def delete_style(self, **mod_info):
+        mod_name = mod_info['mod_name']
+        custom_item = mod_info['custom_item']
+        for k, v in self.mods.items():
+            if k == mod_name:
+                v.delete_style(custom_item=custom_item)
 
     def __str__(self):
         string = ''
@@ -158,9 +173,6 @@ class CreateMod:
 
     def item_script_create(self):
         """Функция генерирующая скрипты для мода"""
-        # Регулярное выражение для поиска скрипта по названию предмета
-        # ({[\s\t\n] * ?\"name\"\s*\"Shadow Fiend's Head\"[\s\S]*})[\s\t\n]*\"\d*?\"
-        # \"нужное поле\"\s*\"([\s\S]*?)\" поиск любого аттрибута в скрипте
         with open('items_game.txt', 'r', encoding='utf-8') as items_game:  # Файл items_game
             # Файл end_script
             with open(f'{self.mod_name}\\mor_scripts\\{self.script_name}.txt', 'w+', encoding='utf-8') as end_script_file:

@@ -1,6 +1,6 @@
 from os import path, rename, remove, mkdir
 import yaml
-from shutil import move, rmtree, Error, make_archive
+from shutil import move, rmtree, Error
 import winreg
 from subprocess import call
 
@@ -42,17 +42,6 @@ def vpk_parse(vpk_path, export_file_path, output_path, output_name=None):
         rmtree(rmtree_name)
 
 
-def mod_info_check():
-    """Функция проверяющая наличие файла информации о модах"""
-    if not path.exists('mods_info.yaml'):
-        mod_info = open("mod_info.yaml", "w")
-        mod_info.close()
-    else:
-        mod_info = open("mod_info.yaml", "w")
-        mod_info.write('')
-        mod_info.close()
-
-
 def config_check():
     """Функция проверяющая наличие конфигурационного файла и создающя его,
     Возвращает путь до ВПК"""
@@ -73,20 +62,22 @@ def config_check():
 
 def scripts_check(vpk_path):
     """Проверка наличия файлов скриптов"""
-    if not path.exists('items_game.txt'):
-        vpk_parse(export_file_path='scripts/items/items_game.txt',
+    vpk_parse(export_file_path='scripts/items/items_game.txt',
                   output_path='', vpk_path=vpk_path)
-    if not path.exists('items_russian.txt'):
-        vpk_parse(export_file_path='resource/localization/items_russian.txt',
+    vpk_parse(export_file_path='resource/localization/items_russian.txt',
                   output_path='', vpk_path=vpk_path)
 
 
 def check_files():
     """Функция проверяющая наличие необходимых файлов"""
-    mod_info_check()
     vpk_path = config_check()
     scripts_check(vpk_path)
 
 
+def create_mod_directories(mod_name):
+    if path.isdir(mod_name):
+        rmtree(mod_name)
+    mkdir(mod_name)
+    mkdir(mod_name+'\\'+'mor_scripts')
 class ParseError(Exception):
     pass
