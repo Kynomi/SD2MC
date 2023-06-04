@@ -4,6 +4,8 @@
 
 Для интерфейса была использована библиотека [dearpygui](https://github.com/hoffstadt/DearPyGui)
 
+Guide languages [Russian](README.md) [English](Resources/Readme/Readme.eng.md)
+
 # Установка необходимых приложений
 1. Программа создает модификации для лаунчера [MOR](https://vk.com/amir4anmods). Зайдите в группу, откройте диалог и выберете пункт "Скачать MOR".
 2. Теперь скачиваем саму программу, для этого жмем кнопку code -> "download zip". Распаковываем в удобном для вас месте.
