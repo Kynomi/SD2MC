@@ -166,7 +166,6 @@ def create_mods(sender, app_data, user_data):
 def main_app():
     mods = Mods()
     dpg.create_context()
-    dpg.configure_app(init_file='dpg.ini')
 
     dpg.add_file_dialog(directory_selector=True, tag='directory_selector', show=False,
                         default_path='C:/', width=600, height=300, callback=change_vpk_path)
@@ -213,7 +212,7 @@ def main_app():
                 dpg.add_table_column(label='Скин')
                 dpg.add_table_column(label='Стиль')
 
-    with dpg.window(label='Изменить конфигурацию модификаций', width=600, height=400, tag='config_mods_window', pos=[600, 0]):
+    with dpg.window(label='Изменить конфигурацию модификаций', width=600, height=200, tag='config_mods_window', pos=[600, 0]):
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='mod_name_combo', width=200, callback=reload_mod_name, user_data=mods)
             dpg.add_input_text(label='Название модификации', width=200, tag='chg_mod_name')
@@ -237,6 +236,7 @@ def main_app():
         dpg.add_button(label='Выбрать путь до папки dota 2 beta', callback=lambda: dpg.show_item('directory_selector'))
 
     dpg.create_viewport(title='SD2MC', width=1280, height=720)
+    dpg.configure_app(init_file='dpg.ini')
     dpg.set_viewport_small_icon('Resources/images/icon.ico')
     dpg.set_viewport_large_icon('Resources/images/icon.ico')
     dpg.setup_dearpygui()

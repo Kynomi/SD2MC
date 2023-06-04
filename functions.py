@@ -62,10 +62,13 @@ def config_check():
 
 def scripts_check(vpk_path):
     """Проверка наличия файлов скриптов"""
-    vpk_parse(export_file_path='scripts/items/items_game.txt',
-                  output_path='', vpk_path=vpk_path)
-    vpk_parse(export_file_path='resource/localization/items_russian.txt',
-                  output_path='', vpk_path=vpk_path)
+    try:
+        vpk_parse(export_file_path='scripts/items/items_game.txt',
+                      output_path='', vpk_path=vpk_path)
+        vpk_parse(export_file_path='resource/localization/items_russian.txt',
+                      output_path='', vpk_path=vpk_path)
+    except FileNotFoundError:
+        pass
 
 
 def check_files():
@@ -79,5 +82,7 @@ def create_mod_directories(mod_name):
         rmtree(mod_name)
     mkdir(mod_name)
     mkdir(mod_name+'\\'+'mor_scripts')
+
+
 class ParseError(Exception):
     pass
