@@ -5,7 +5,10 @@ from datetime import datetime
 from functions import ParseError, create_mod_directories
 from shutil import rmtree, make_archive
 from os import path
+import ctypes
 
+myappid = 'kynomi.SD2MC' # arbitrary string
+ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
 
 def change_vpk_path(sender, app_data):
     with open('config.yaml', 'w', encoding='utf-8') as config_file:
@@ -42,8 +45,20 @@ def reload_mod_name(sender, app_data, mods):
     dpg.configure_item('styles_itm_combo', items=styles)
 
 
-def mods_information():
-    pass
+def mods_information(sender, app_data, user_data):
+    dpg.delete_item('mod_info_table')
+    with dpg.table(tag='mod_info_table', parent='mod_info_child_window'):
+        dpg.add_table_column(label='Стандартный предмет')
+        dpg.add_table_column(label='Скин')
+        dpg.add_table_column(label='Стиль')
+        for item in user_data.get_mod_items(app_data):
+            with dpg.table_row():
+                style = item[2]
+                if style is None:
+                    style = 'Отсутствует'
+                dpg.add_text(f'{item[0]}')
+                dpg.add_text(f'{item[1]}')
+                dpg.add_text(f'{style}')
 
 
 def show_window(sender, app_data, user_data):
@@ -147,6 +162,7 @@ def create_mods(sender, app_data, user_data):
         if path.isdir(mod_name):
             rmtree(mod_name)
 
+
 def main_app():
     mods = Mods()
     dpg.create_context()
@@ -163,7 +179,7 @@ def main_app():
         small_start = 0x00E0
         replace_start_big = 0x0410
         replace_start_small = 0x0430
-        with dpg.font('Roboto/Roboto-Bold.ttf', 15, default_font=True) as default_font:
+        with dpg.font('Resources/fonts/Roboto-Bold.ttf', 15, default_font=True) as default_font:
             dpg.add_font_range_hint(dpg.mvFontRangeHint_Cyrillic)
             for i in range(0, 32):
                 dpg.add_char_remap(big_start + i, replace_start_big + i)
@@ -190,9 +206,12 @@ def main_app():
             dpg.add_checkbox(tag='style_itm_checkbox')
         dpg.add_input_text(label='Название модификации', width=150, tag='mod_name_input')
         dpg.add_button(label='Добавить модификацию', user_data=mods, callback=add_mods)
-        with dpg.child_window(label='Информация о модификациях'):
-            dpg.add_combo(items=[], tag='itm_combobox', callback=mods_information)
-            dpg.add_text()
+        with dpg.child_window(label='Информация о модификациях', tag='mod_info_child_window'):
+            dpg.add_combo(items=[], tag='itm_combobox', callback=mods_information, user_data=mods)
+            with dpg.table(tag='mod_info_table'):
+                dpg.add_table_column(label='Стандартный предмет')
+                dpg.add_table_column(label='Скин')
+                dpg.add_table_column(label='Стиль')
 
     with dpg.window(label='Изменить конфигурацию модификаций', width=600, height=400, tag='config_mods_window', pos=[600, 0]):
         with dpg.group(horizontal=True):
@@ -217,7 +236,9 @@ def main_app():
         dpg.add_text(default_value=vpk_path, tag='vpk_path')
         dpg.add_button(label='Выбрать путь до папки dota 2 beta', callback=lambda: dpg.show_item('directory_selector'))
 
-    dpg.create_viewport(title='Custom Title', width=1280, height=720)
+    dpg.create_viewport(title='SD2MC', width=1280, height=720)
+    dpg.set_viewport_small_icon('Resources/images/icon.ico')
+    dpg.set_viewport_large_icon('Resources/images/icon.ico')
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.start_dearpygui()
