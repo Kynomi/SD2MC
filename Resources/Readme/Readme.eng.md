@@ -4,7 +4,6 @@ Logo for window was taken from [UI icons from Dragon Icons](https://www.flaticon
 
 For interface used library [dearpygui](https://github.com/hoffstadt/DearPyGui)
 
-English interface coming soon.
 Guide languages [Russian](../../README.md) [English](Readme.eng.md)
 # Install requirements
 1. The program creates mods for launcher [MOR](https://vk.com/amir4anmods). Enter the group, open the dialogue and press "Скачать MOR".
