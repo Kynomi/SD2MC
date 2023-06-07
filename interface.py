@@ -216,7 +216,7 @@ def main_app(lang_file):
             dpg.add_menu_item(label=names['#mods_config_tab'], callback=show_window, user_data='config_mods_window')
             dpg.add_menu_item(label=names['#save_tabs_config'], callback=save_init)
 
-    with dpg.window(label=names['#create_mod'], width=600, height=400, tag='mods_window', no_resize=False):
+    with dpg.window(label=names['#add_mods_tab'], width=600, height=400, tag='mods_window', no_resize=False):
         dpg.add_input_text(label=names['#standart_itm_name'], width=150, tag='default_itm_input')
         dpg.add_input_text(label=names['#skin_itm_name'], width=150, tag='custom_itm_input')
         with dpg.group(horizontal=True):
@@ -244,7 +244,7 @@ def main_app(lang_file):
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='styles_itm_combo', width=200)
             dpg.add_input_text(width=200, label=names['#style'], tag='chg_style_itm')
-            dpg.add_button(label='Удалить стиль', callback=delete_style, user_data=mods)
+            dpg.add_button(label=names['#delete_style_btn'], callback=delete_style, user_data=mods)
         with dpg.group(horizontal=True):
             dpg.add_button(label=names['#change_mod_config_btn'], callback=change_mod_info, user_data=mods)
 

@@ -14,6 +14,7 @@
 '#style': style
 '#mod_name': name of the modification
 '#add_mods_btn': add modification
-'#mods_config_tab': configuration of modifications
-'#change_mod_config_btn': change the configuration of mods
-'#save_tabs_config': save tab configuration
+'#mods_config_tab': change the configuration of the mods
+'#change_mod_config_btn': apply
+'#delete_style_btn': delete style
+'#save_tabs_config': save tabs configuration
