@@ -16,30 +16,17 @@ Guide languages [Russian](../../README.md) [English](Readme.eng.md)
    - If there is Disable path length limit in the end of installation, press this button.
 # Using of program
 
-![python_Gsbj2hsrfp](https://github.com/Kynomi/SD2MC/assets/98938787/057dbf99-95d2-4c9c-93e8-2ba0bc6d0430)
+![python_jMofwxSKum](https://github.com/Kynomi/SD2MC/assets/98938787/04b9ae0a-58fe-4907-b2be-a56258fe23c8)
 
 1. To start the program use start.bat
-2. After start program you will see 2 open tabs "Добавить модификации" and "Изменить конфигурацию модов"
-3. In the tab "Добавить модификции" you can add modifications.
-   - For this input standart item in field "Название стандартного предмета", modification name in "Название модификации". If you need the style enable flag "Стиль" and input the number of style in the field.
-
-    ![python_GN9kfoanjj](https://github.com/Kynomi/SD2MC/assets/98938787/b1fc12ba-9d1c-409d-8b59-79f4cc19b1e7)
-
+2. After start program you will see 2 open tabs "add modifications" and "Change the configuration of the mods"
+3. You can add modification in the tab with similar name.
+   - For this input standart item, skin and mod name in the fields. If you need the style, enable the flag and input the number of style in the field.
    - How to find standart item name? There is in the folder items_game.txt file, open it. Find in the file standart items. It named like *hero_name*'s *item_name*. For example Medusa's Bow
    - There is a table below. Choose the modification in Drop-down list. You can see modification information in the table
-4. In the tab "Изменить конфигурацию модов" you can correct faults.
-   - Choose mod name in drop-down list, than items. Write right names in the field to the right from drop-down lists.
-
-   ![python_qiSoJjc9s1](https://github.com/Kynomi/SD2MC/assets/98938787/b9bad8f6-b199-4222-9056-215ecc1935bb)   
-
-5. Now open "файл" -> "Создать модификации" to create the modifications.
-6. You can also save mod configuration. For this open "файл" -> "Сохранить конфигурацию модов"/"Загрузить конфигурацию модов"
-
-![python_5LKbviKriD](https://github.com/Kynomi/SD2MC/assets/98938787/32488023-001e-4534-ad64-d10b41547584)
-![python_t119kK2vXv](https://github.com/Kynomi/SD2MC/assets/98938787/51ffd5d3-e323-46df-b630-fb58d18ea186)
-
-7. To open close tabs open "Вкладки" -> press the tab button.
-   - You can also save tabs place and size "Вкладки" -> "Сохранить конфигурацию вкладок".
-8. If you need to change dota path "файл" -> "настройки"
-
-![python_sPqm1sNRuG](https://github.com/Kynomi/SD2MC/assets/98938787/6bfb9c6a-5ef3-4a23-8316-1631e70869d4)
+4. In the tab "Configuration of the modifications" you can correct faults.
+   - Choose mod name in drop-down list, than items. Write right names in the field to the right from drop-down lists. 
+6. You can also save mod configuration. For this open "Files" -> "Save configuration of modifications"/"Load configuration of modifications"
+7. To show closed tabs use "Tabs".
+   - You can also save tabs place and size "Tabs" -> "Save tabs configuration".
+8. If you need to change dota path or language use "Files -> "Settings"
