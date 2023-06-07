@@ -1,0 +1,19 @@
+'#menu_files': files
+'#menu_tabs': tabs
+'#create_mod': create modifications
+'#save_mod_config': save configuration of modifications
+'#load_mod_config': load configuration of modifications
+'#settings': settings
+'#change_path_btn': select the path to the dota 2 beta folder
+'#select_lang': select_lang
+'#change_lang_notif': for apply the changes, you need to restart the app.
+'#tabs': tabs
+'#add_mods_tab': add modifications
+'#standart_itm_name': standard item
+'#skin_itm_name': skin
+'#style': style
+'#mod_name': name of the modification
+'#add_mods_btn': add modification
+'#mods_config_tab': configuration of modifications
+'#change_mod_config_btn': change the configuration of mods
+'#save_tabs_config': save tab configuration

@@ -1,4 +1,6 @@
 import dearpygui.dearpygui as dpg
+import os
+import sys
 from mod import Mods, CreateMod
 from yaml import dump, load, Loader
 from datetime import datetime
@@ -9,6 +11,20 @@ import ctypes
 
 myappid = 'kynomi.SD2MC' # arbitrary string
 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(myappid)
+
+
+def change_language(sender, app_data, user_data):
+    with open('config.yaml', 'r') as config:
+        data = load(config, Loader=Loader)
+        data['language'] = app_data
+    with open('config.yaml', 'w') as config:
+        dump(data, config)
+    result = message_box(user_data, 0)
+
+
+def message_box(message, style):
+    return ctypes.windll.user32.MessageBoxW(0, message, '', style)
+
 
 def change_vpk_path(sender, app_data):
     with open('config.yaml', 'w', encoding='utf-8') as config_file:
@@ -163,10 +179,13 @@ def create_mods(sender, app_data, user_data):
             rmtree(mod_name)
 
 
-def main_app():
+def main_app(lang_file):
     mods = Mods()
     dpg.create_context()
-
+    with open(lang_file, 'r', encoding='utf-8') as language_config:
+        names = load(language_config, Loader=Loader)
+        for k, v in names.items():
+            names[k] = v[0].upper() + v[1:]
     dpg.add_file_dialog(directory_selector=True, tag='directory_selector', show=False,
                         default_path='C:/', width=600, height=300, callback=change_vpk_path)
 
@@ -187,54 +206,57 @@ def main_app():
     dpg.bind_font(default_font)
 
     with dpg.viewport_menu_bar():
-        with dpg.menu(label='Файл'):
-            dpg.add_menu_item(label='Создать модификации', callback=create_mods, user_data=mods)
-            dpg.add_menu_item(label='Сохранить конфигурацию модов', callback=save_mods_configuration, user_data=mods)
-            dpg.add_menu_item(label='Загрузить конфигурацию модов', callback=lambda: dpg.show_item('mod_selector'))
-            dpg.add_menu_item(label='Настройки', callback=show_window, user_data='settings_window')
-        with dpg.menu(label='Вкладки'):
-            dpg.add_menu_item(label='Добавить модификации', callback=show_window, user_data='mods_window')
-            dpg.add_menu_item(label='Конфигурация Модификаций', callback=show_window, user_data='config_mods_window')
-            dpg.add_menu_item(label='Сохранить конфигурацию вкладок', callback=save_init)
+        with dpg.menu(label=names['#menu_files']):
+            dpg.add_menu_item(label=names['#create_mod'], callback=create_mods, user_data=mods)
+            dpg.add_menu_item(label=names['#save_mod_config'], callback=save_mods_configuration, user_data=mods)
+            dpg.add_menu_item(label=names['#load_mod_config'], callback=lambda: dpg.show_item('mod_selector'))
+            dpg.add_menu_item(label=names['#settings'], callback=show_window, user_data='settings_window')
+        with dpg.menu(label=names['#menu_tabs']):
+            dpg.add_menu_item(label=names['#add_mods_tab'], callback=show_window, user_data='mods_window')
+            dpg.add_menu_item(label=names['#mods_config_tab'], callback=show_window, user_data='config_mods_window')
+            dpg.add_menu_item(label=names['#save_tabs_config'], callback=save_init)
 
-    with dpg.window(label='Добавить модификации', width=600, height=400, tag='mods_window', no_resize=False):
-        dpg.add_input_text(label='Название стандартного предмета', width=150, tag='default_itm_input')
-        dpg.add_input_text(label='Название скина', width=150, tag='custom_itm_input')
+    with dpg.window(label=names['#create_mod'], width=600, height=400, tag='mods_window', no_resize=False):
+        dpg.add_input_text(label=names['#standart_itm_name'], width=150, tag='default_itm_input')
+        dpg.add_input_text(label=names['#skin_itm_name'], width=150, tag='custom_itm_input')
         with dpg.group(horizontal=True):
-            dpg.add_input_text(label='Стиль', width=150, tag='style_itm_input')
+            dpg.add_input_text(label=names['#style'], width=150, tag='style_itm_input')
             dpg.add_checkbox(tag='style_itm_checkbox')
-        dpg.add_input_text(label='Название модификации', width=150, tag='mod_name_input')
-        dpg.add_button(label='Добавить модификацию', user_data=mods, callback=add_mods)
+        dpg.add_input_text(label=names['#mod_name'], width=150, tag='mod_name_input')
+        dpg.add_button(label=names['#add_mods_btn'], user_data=mods, callback=add_mods)
         with dpg.child_window(label='Информация о модификациях', tag='mod_info_child_window'):
             dpg.add_combo(items=[], tag='itm_combobox', callback=mods_information, user_data=mods)
             with dpg.table(tag='mod_info_table'):
-                dpg.add_table_column(label='Стандартный предмет')
-                dpg.add_table_column(label='Скин')
-                dpg.add_table_column(label='Стиль')
+                dpg.add_table_column(label=names['#standart_itm_name'])
+                dpg.add_table_column(label=names['#skin_itm_name'])
+                dpg.add_table_column(label=names['#style'])
 
-    with dpg.window(label='Изменить конфигурацию модификаций', width=600, height=200, tag='config_mods_window', pos=[600, 0]):
+    with dpg.window(label=names['#mods_config_tab'], width=600, height=200, tag='config_mods_window', pos=[600, 0]):
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='mod_name_combo', width=200, callback=reload_mod_name, user_data=mods)
-            dpg.add_input_text(label='Название модификации', width=200, tag='chg_mod_name')
+            dpg.add_input_text(label=names['#mod_name'], width=200, tag='chg_mod_name')
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='default_itm_combo', width=200)
-            dpg.add_input_text(width=200, label='Стандартный предмет', tag='chg_default_itm')
+            dpg.add_input_text(width=200, label=names['#standart_itm_name'], tag='chg_default_itm')
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='custom_itm_combo', width=200)
-            dpg.add_input_text(width=200, label='Скин', tag='chg_custom_itm')
+            dpg.add_input_text(width=200, label=names['#skin_itm_name'], tag='chg_custom_itm')
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='styles_itm_combo', width=200)
-            dpg.add_input_text(width=200, label='Стиль', tag='chg_style_itm')
+            dpg.add_input_text(width=200, label=names['#style'], tag='chg_style_itm')
             dpg.add_button(label='Удалить стиль', callback=delete_style, user_data=mods)
         with dpg.group(horizontal=True):
-            dpg.add_button(label='Изменить конфигурацию модов', callback=change_mod_info, user_data=mods)
+            dpg.add_button(label=names['#change_mod_config_btn'], callback=change_mod_info, user_data=mods)
 
-    with dpg.window(label='Настройки', tag='settings_window', show=False, width=600, height=100):
+    with dpg.window(label=names['#settings'], tag='settings_window', show=False, width=600, height=200):
         with open('config.yaml', 'r', encoding='utf-8') as config_file:
             vpk_path = load(config_file, Loader=Loader)['vpk_path']
         dpg.add_text(default_value=vpk_path, tag='vpk_path')
-        dpg.add_button(label='Выбрать путь до папки dota 2 beta', callback=lambda: dpg.show_item('directory_selector'))
-
+        dpg.add_button(label=names['#change_path_btn'], callback=lambda: dpg.show_item('directory_selector'))
+        with dpg.group(horizontal=True):
+            dpg.add_text(default_value=names['#select_lang'])
+            dpg.add_combo(items=['en', 'ru'], callback=change_language, user_data=names['#change_lang_notif'])
+    del names
     dpg.create_viewport(title='SD2MC', width=1280, height=720)
     dpg.configure_app(init_file='dpg.ini')
     dpg.set_viewport_small_icon('Resources/images/icon.ico')

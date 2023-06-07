@@ -3,5 +3,6 @@ from interface import main_app
 
 
 if __name__ == '__main__':
-    check_files()
-    main_app()
+    lang = check_files()
+    lang_file = f'Resources\\Languages\\{lang}.yaml'
+    main_app(lang_file)

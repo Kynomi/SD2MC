@@ -5,12 +5,14 @@ import winreg
 from subprocess import call
 
 
-def get_vpk_path():
+def get_properties(*args):
     """Эта функция получает путь до ВПК файла"""
     with open('config.yaml', 'r') as config:
-        vpk_path = yaml.safe_load(config)
-        vpk_path = vpk_path['vpk_path']
-    return vpk_path
+        data = yaml.safe_load(config)
+        properties = []
+        for property in args:
+            properties.append(data[property])
+    return properties
 
 
 def vpk_parse(vpk_path, export_file_path, output_path, output_name=None):
@@ -51,13 +53,14 @@ def config_check():
         steam_path = winreg.QueryValueEx(aKey, 'SteamPath')[0]
         with open('config.yaml', 'w') as config:
             steam_path = steam_path.replace("/", "\\")
-            vpk_path = {
-                'vpk_path': f"{steam_path}\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk"}
-            yaml.dump(vpk_path, config)
-            vpk_path = vpk_path['vpk_path']
+            data = {
+                'vpk_path': f"{steam_path}\\steamapps\\common\\dota 2 beta\\game\\dota\\pak01_dir.vpk",
+                'language': 'en'}
+            yaml.dump(data, config)
+            properties = data.values()
     else:
-        vpk_path = get_vpk_path()
-    return vpk_path
+        properties = get_properties('vpk_path', 'language')
+    return properties
 
 
 def scripts_check(vpk_path):
@@ -73,8 +76,9 @@ def scripts_check(vpk_path):
 
 def check_files():
     """Функция проверяющая наличие необходимых файлов"""
-    vpk_path = config_check()
+    vpk_path, lang = config_check()
     scripts_check(vpk_path)
+    return lang
 
 
 def create_mod_directories(mod_name):
