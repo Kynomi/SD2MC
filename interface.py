@@ -117,12 +117,20 @@ def change_mod_info(sender, app_data, user_data):
         old_default_item = dpg.get_value('default_itm_combo')
         old_custom_item = dpg.get_value('custom_itm_combo')
         old_style = dpg.get_value('styles_itm_combo')
+        if old_style.strip() == '':
+            old_style = None
         new_mod_name = dpg.get_value('chg_mod_name')
-        if new_mod_name.strip() == '':
-            new_mod_name = None
         new_default_item = dpg.get_value('chg_default_itm')
         new_custom_item = dpg.get_value('chg_custom_itm')
         new_style = dpg.get_value('chg_style_itm')
+        if new_mod_name.strip() == '':
+            new_mod_name = None
+        if new_default_item.strip() == '':
+            new_default_item = None
+        if new_custom_item.strip() == '':
+            new_custom_item = None
+        if new_style.strip() == '':
+            new_style = None
         user_data.change_mod(mod_name=old_mod_name, default_item=old_default_item, custom_item=old_custom_item, style=old_style,
                              new_mod_name=new_mod_name, new_default_item=new_default_item, new_custom_item=new_custom_item,
                              new_style=new_style)
