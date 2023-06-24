@@ -141,7 +141,7 @@ class Mods:
 
 class CreateMod:
     """Класс создания мода"""
-    def __init__(self, default_item_name, custom_item_name, mod_name, script_number, vpk_path, style):
+    def __init__(self, default_item_name, custom_item_name, mod_name, script_number, vpk_path, style=None):
         if style is not None:
             self.style = int(style) - 1
         else:
@@ -224,7 +224,7 @@ class CreateMod:
                     custom_item_item_name = findall(custom_item_item_name_exp, items_russian_text, IGNORECASE)[0]
                     custom_item_script = custom_item_script.replace('#' + item_name_tag, custom_item_item_name)
                     custom_item_script = custom_item_script.replace('wearable', default_item_prefab)
-                    custom_item_script = custom_item_script.replace(self.custom_item_name, self.default_item_name)
+                    custom_item_script = custom_item_script.replace(self.custom_item_name, self.default_item_name, 1)
                     custom_item_script = custom_item_script.replace(custom_item_model_player_path, default_model_player_path)
                     print(custom_item_item_name, item_name_tag)
                     # "DOTA_Bundle_Assemblage_of_Announcers_Pack"        "Комплект «Собрание комментаторов»"
@@ -277,3 +277,7 @@ class CreateMod:
         text = [i for i in text if i.strip() != '']
         text = '\n'.join(text)
         return text
+
+
+if __name__ == '__main__':
+    CreateMod(default_item_name="Void Spirit's Belt", custom_item_name="Hidden Vector - Belt", mod_name='test', script_number=1, vpk_path="C:\Program Files (x86)\Steam\steamapps\common\dota 2 beta\game\dota\pak01_dir.vpk")
