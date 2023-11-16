@@ -12,12 +12,12 @@ Guide languages [Russian](README.md) [English](Resources/Readme/Readme.eng.md)
 3. Теперь необходимо скачать [python](https://python.org/download). Устанавливаем его на свой компьютер.
    - При установке необходимо поставить галочку Add python.exe to PATH
 
-   ![python-3 10 10-amd64_BhmbvRX6AR](https://github.com/Kynomi/SD2MC/assets/98938787/a35486f3-a7c8-4b74-9fc4-584dd8cb7815)
+   ![Скриншот окна установщика python](https://github.com/Kynomi/SD2MC/assets/98938787/a35486f3-a7c8-4b74-9fc4-584dd8cb7815)
    
    - В конце установки советую нажать кнопку Disable path length limit, если она имеется.
 # Использование программы
 
-![python_Gsbj2hsrfp](https://github.com/Kynomi/SD2MC/assets/98938787/057dbf99-95d2-4c9c-93e8-2ba0bc6d0430)
+![Скриншот окна программы](Resources/Readme/images/program_interface_ru.png)
 
 1. Для запуска программы используется start.bat
 2. После запуска программы вы увидите 2 открытых вкладки "Добавить модификации" и "Изменить конфигурацию модов"

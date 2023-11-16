@@ -11,12 +11,12 @@ Guide languages [Russian](../../README.md) [English](Readme.eng.md)
 3. Now you need to download [python](https://python.org/download).
    - Don't forget to enable Add python.exe to PATH flag
 
-   ![python-3 10 10-amd64_BhmbvRX6AR](https://github.com/Kynomi/SD2MC/assets/98938787/a35486f3-a7c8-4b74-9fc4-584dd8cb7815)
+   ![Python installer screenshot](https://github.com/Kynomi/SD2MC/assets/98938787/a35486f3-a7c8-4b74-9fc4-584dd8cb7815)
    
    - If there is Disable path length limit in the end of installation, press this button.
 # Using of program
 
-![python_jMofwxSKum](https://github.com/Kynomi/SD2MC/assets/98938787/04b9ae0a-58fe-4907-b2be-a56258fe23c8)
+![Program interface screenshot](images/program_interface_en.png)
 
 1. To start the program use start.bat
 2. After start program you will see 2 open tabs "add modifications" and "Change the configuration of the mods"
