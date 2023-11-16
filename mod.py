@@ -95,7 +95,10 @@ class Mods:
         self.mods = {}
 
     @staticmethod
-    def find_default_item(custom_item_script, items_game_text):
+    def find_default_item(custom_item, items_game_text):
+        custom_item_script = parse_script(custom_item, items_game_text)
+        if 'arcana' in custom_item_script:
+            raise ParseError('Данная программа не умеет делать арканы')
         default_item_script = None
         default_items = findall(r'\t\t{\n[^}]*?^\t\t\t"prefab"\t\t"default_item"[\s\S]*?^\t\t}', items_game_text,
                                    flags=MULTILINE+IGNORECASE)
@@ -109,6 +112,8 @@ class Mods:
             else:
                 if 'item_slot' not in default_item and custom_item_used_by_heroes in default_item:
                     default_item_script = default_item
+        if 'model_player' not in default_item_script:
+            raise ParseError(f'У {custom_item} нет стандартной модели')
         default_item_name = findall(r'"name"\t\t"([\s\S]*?)"', default_item_script, IGNORECASE)[0]
         return default_item_name
 
@@ -120,8 +125,7 @@ class Mods:
         if 'default_item' not in mod_info.keys():
             with open('items_game.txt', 'r', encoding='utf-8') as items_game_file:
                 items_game_text = items_game_file.read()
-                custom_item_script = parse_script(custom_item, items_game_text)
-                default_item = self.find_default_item(custom_item_script, items_game_text)
+                default_item = self.find_default_item(custom_item, items_game_text)
         else:
             default_item = mod_info['default_item']
         if mod_name in self.mods.keys():
@@ -153,8 +157,7 @@ class Mods:
             items_game_file = open('items_game.txt', 'r', encoding='utf-8')
             items_game_text = items_game_file.read()
             items_game_file.close()
-            custom_item_script = parse_script(new_custom_item, items_game_text)
-            new_default_item = self.find_default_item(custom_item_script, items_game_text)
+            new_default_item = self.find_default_item(new_custom_item, items_game_text)
         else:
             new_custom_item = None
         new_style = mod_info['new_style']
