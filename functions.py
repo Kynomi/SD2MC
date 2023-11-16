@@ -6,7 +6,7 @@ from subprocess import call
 
 
 def get_properties(*args):
-    """Эта функция получает путь до ВПК файла"""
+    """Эта функция получает настройки из конфиг файла"""
     with open('config.yaml', 'r') as config:
         data = yaml.safe_load(config)
         properties = []

@@ -1,3 +1,5 @@
+import re
+
 import dearpygui.dearpygui as dpg
 import os
 import sys
@@ -27,9 +29,12 @@ def message_box(message, style):
 
 
 def change_vpk_path(sender, app_data):
+    print(app_data)
+    with open('config.yaml', 'r') as config:
+        data = load(config, Loader=Loader)
     with open('config.yaml', 'w', encoding='utf-8') as config_file:
         path = app_data['file_path_name'] + '\\game\\dota\\pak01_dir.vpk'
-        data = {'vpk_path': path}
+        data['vpk_path'] = path
         dump(data, config_file)
         dpg.configure_item('vpk_path', default_value=path)
 
@@ -49,14 +54,11 @@ def reload_mod_name(sender, app_data, mods):
     """Функция отвечающая за обновление combobox'ов во вкладке изменение конфигурации модов.
     При выборе названия мода обновляются предметы и стили"""
     items = mods.get_mod_items(app_data)
-    default_items = []
     custom_items = []
     styles = []
     for i in items:
-        default_items.append(i[0])
         custom_items.append(i[1])
         styles.append(f'{i[1]}({i[2]})'.replace('None', 'Отсутствует'))
-    dpg.configure_item('default_itm_combo', items=default_items)
     dpg.configure_item('custom_itm_combo', items=custom_items)
     dpg.configure_item('styles_itm_combo', items=styles)
 
@@ -85,28 +87,27 @@ def add_mods(sender, app_data, mods):
     """Добавление предмета в модификацию"""
     mod_name = dpg.get_value('mod_name_input')
     if not mod_name.strip() == '':
-        default_item = dpg.get_value('default_itm_input')
         custom_item = dpg.get_value('custom_itm_input')
         style = dpg.get_value('style_itm_input')
         if not (dpg.get_value('style_itm_checkbox') and style.strip() != ''):
             style = None
-        dpg.set_value('default_itm_input', '')
         dpg.set_value('custom_itm_input', '')
         dpg.set_value('style_itm_input', '')
         dpg.set_value('mod_name_input', mod_name)
         dpg.set_value('style_itm_checkbox', False)
-        mods.append_mod(default_item=default_item, custom_item=custom_item, style=style, mod_name=mod_name)
-        reload(mods)
+        try:
+            mods.append_mod(custom_item=custom_item, style=style, mod_name=mod_name)
+            reload(mods)
+        except ParseError as e:
+            message_box(str(e), 0)
 
 
 def clear_change_mod_inputs(new_mod_name, mods):
     dpg.set_value('chg_mod_name', value='')
-    dpg.set_value('chg_default_itm', value='')
     dpg.set_value('chg_custom_itm', value='')
     dpg.set_value('chg_style_itm', value='')
     dpg.configure_item(item='mod_name_combo', default_value=new_mod_name)
     dpg.configure_item(item='custom_itm_combo', default_value='')
-    dpg.configure_item(item='default_itm_combo', default_value='')
     dpg.configure_item(item='styles_itm_combo', default_value='')
     reload_mod_name(sender='', app_data=new_mod_name, mods=mods)
 
@@ -114,27 +115,32 @@ def clear_change_mod_inputs(new_mod_name, mods):
 def change_mod_info(sender, app_data, user_data):
     old_mod_name = dpg.get_value('mod_name_combo')
     if not old_mod_name.strip() == '':
-        old_default_item = dpg.get_value('default_itm_combo')
         old_custom_item = dpg.get_value('custom_itm_combo')
         old_style = dpg.get_value('styles_itm_combo')
         if old_style.strip() == '':
             old_style = None
         new_mod_name = dpg.get_value('chg_mod_name')
-        new_default_item = dpg.get_value('chg_default_itm')
         new_custom_item = dpg.get_value('chg_custom_itm')
         new_style = dpg.get_value('chg_style_itm')
         if new_mod_name.strip() == '':
             new_mod_name = None
-        if new_default_item.strip() == '':
-            new_default_item = None
-        if new_custom_item.strip() == '':
+        if new_custom_item.strip() == '' or new_custom_item == old_custom_item:
             new_custom_item = None
         if new_style.strip() == '':
             new_style = None
-        user_data.change_mod(mod_name=old_mod_name, default_item=old_default_item, custom_item=old_custom_item, style=old_style,
-                             new_mod_name=new_mod_name, new_default_item=new_default_item, new_custom_item=new_custom_item,
-                             new_style=new_style)
+        try:
+            user_data.change_mod(mod_name=old_mod_name, custom_item=old_custom_item, style=old_style,
+                                 new_mod_name=new_mod_name, new_custom_item=new_custom_item,
+                                 new_style=new_style)
+        except ParseError as e:
+            message_box(str(e), 0)
         reload(user_data)
+        if dpg.get_value('itm_combobox') == old_mod_name:
+            if not new_mod_name:
+                mods_information(None, old_mod_name, user_data)
+            else:
+                mods_information(None, new_mod_name, user_data)
+
         if new_mod_name is None:
             new_mod_name = old_mod_name
         clear_change_mod_inputs(new_mod_name=new_mod_name, mods=user_data)
@@ -225,13 +231,13 @@ def main_app(lang_file):
             dpg.add_menu_item(label=names['#save_tabs_config'], callback=save_init)
 
     with dpg.window(label=names['#add_mods_tab'], width=600, height=400, tag='mods_window', no_resize=False):
-        dpg.add_input_text(label=names['#standart_itm_name'], width=150, tag='default_itm_input')
-        dpg.add_input_text(label=names['#skin_itm_name'], width=150, tag='custom_itm_input')
+        # dpg.add_input_text(label=names['#standart_itm_name'], width=180, tag='default_itm_input')
+        dpg.add_input_text(label=names['#skin_itm_name'], width=180, tag='custom_itm_input')
         with dpg.group(horizontal=True):
-            dpg.add_input_text(label=names['#style'], width=150, tag='style_itm_input')
+            dpg.add_input_text(label=names['#style'], width=180, tag='style_itm_input')
             dpg.add_checkbox(tag='style_itm_checkbox')
-        dpg.add_input_text(label=names['#mod_name'], width=150, tag='mod_name_input')
-        dpg.add_button(label=names['#add_mods_btn'], user_data=mods, callback=add_mods)
+        dpg.add_input_text(label=names['#mod_name'], width=180, tag='mod_name_input')
+        dpg.add_button(label=names['#add_mods_btn'], user_data=mods, callback=add_mods, width=180)
         with dpg.child_window(label='Информация о модификациях', tag='mod_info_child_window'):
             dpg.add_combo(items=[], tag='itm_combobox', callback=mods_information, user_data=mods)
             with dpg.table(tag='mod_info_table'):
@@ -243,9 +249,9 @@ def main_app(lang_file):
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='mod_name_combo', width=200, callback=reload_mod_name, user_data=mods)
             dpg.add_input_text(label=names['#mod_name'], width=200, tag='chg_mod_name')
-        with dpg.group(horizontal=True):
-            dpg.add_combo(tag='default_itm_combo', width=200)
-            dpg.add_input_text(width=200, label=names['#standart_itm_name'], tag='chg_default_itm')
+        # with dpg.group(horizontal=True):
+        #     dpg.add_combo(tag='default_itm_combo', width=200)
+        #     dpg.add_input_text(width=200, label=names['#standart_itm_name'], tag='chg_default_itm')
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='custom_itm_combo', width=200)
             dpg.add_input_text(width=200, label=names['#skin_itm_name'], tag='chg_custom_itm')

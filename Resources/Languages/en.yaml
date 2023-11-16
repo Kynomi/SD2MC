@@ -5,7 +5,7 @@
 '#load_mod_config': load configuration of modifications
 '#settings': settings
 '#change_path_btn': select the path to the dota 2 beta folder
-'#select_lang': select_lang
+'#select_lang': select language
 '#change_lang_notif': for apply the changes, you need to restart the app.
 '#tabs': tabs
 '#add_mods_tab': add modifications
