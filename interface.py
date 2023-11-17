@@ -1,8 +1,4 @@
-import re
-
 import dearpygui.dearpygui as dpg
-import os
-import sys
 from mod import Mods, CreateMod
 from yaml import dump, load, Loader
 from datetime import datetime
@@ -152,6 +148,16 @@ def delete_style(sender, app_data, user_data):
     user_data.delete_style(custom_item=custom_item, mod_name=mod_name)
 
 
+def delete_mod(sender, app_data, user_data):
+    mod_name = dpg.get_value('mod_name_combo')
+    item_name = dpg.get_value('custom_itm_combo')
+    if item_name.strip() != '' and mod_name.strip() != '':
+        user_data.delete_mod(mod_name=mod_name, item_name=item_name)
+    clear_change_mod_inputs(mod_name, user_data)
+    if mod_name == dpg.get_value('itm_combobox'):
+        mods_information(None, mod_name, user_data)
+
+
 def save_mods_configuration(sender, app_data, user_data):
     data = user_data.get_mods()
     filename = f'{datetime.now():%d.%m.%y-%H_%M}.mds'
@@ -191,6 +197,7 @@ def create_mods(sender, app_data, user_data):
         make_archive(mod_name, 'zip', mod_name)
         if path.isdir(mod_name):
             rmtree(mod_name)
+    message_box('Модификации успешно созданы', 0)
 
 
 def main_app(lang_file):
@@ -231,7 +238,6 @@ def main_app(lang_file):
             dpg.add_menu_item(label=names['#save_tabs_config'], callback=save_init)
 
     with dpg.window(label=names['#add_mods_tab'], width=600, height=400, tag='mods_window', no_resize=False):
-        # dpg.add_input_text(label=names['#standart_itm_name'], width=180, tag='default_itm_input')
         dpg.add_input_text(label=names['#skin_itm_name'], width=180, tag='custom_itm_input')
         with dpg.group(horizontal=True):
             dpg.add_input_text(label=names['#style'], width=180, tag='style_itm_input')
@@ -249,9 +255,6 @@ def main_app(lang_file):
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='mod_name_combo', width=200, callback=reload_mod_name, user_data=mods)
             dpg.add_input_text(label=names['#mod_name'], width=200, tag='chg_mod_name')
-        # with dpg.group(horizontal=True):
-        #     dpg.add_combo(tag='default_itm_combo', width=200)
-        #     dpg.add_input_text(width=200, label=names['#standart_itm_name'], tag='chg_default_itm')
         with dpg.group(horizontal=True):
             dpg.add_combo(tag='custom_itm_combo', width=200)
             dpg.add_input_text(width=200, label=names['#skin_itm_name'], tag='chg_custom_itm')
@@ -261,6 +264,7 @@ def main_app(lang_file):
             dpg.add_button(label=names['#delete_style_btn'], callback=delete_style, user_data=mods)
         with dpg.group(horizontal=True):
             dpg.add_button(label=names['#change_mod_config_btn'], callback=change_mod_info, user_data=mods)
+            dpg.add_button(label=names['#delete_item_from_mod_btn'], callback=delete_mod, user_data=mods)
 
     with dpg.window(label=names['#settings'], tag='settings_window', show=False, width=600, height=200):
         with open('config.yaml', 'r', encoding='utf-8') as config_file:

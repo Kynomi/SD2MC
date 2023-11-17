@@ -1,6 +1,7 @@
 '#menu_files': файлы
 '#menu_tabs': вкладки
 '#create_mod': создать модификации
+'#mods_created': модификации успешно созданы
 '#save_mod_config': сохранить конфигурацию модификаций
 '#load_mod_config': загрузить конфигурацию модификаций
 '#settings': настройки
@@ -18,3 +19,4 @@
 '#change_mod_config_btn': применить
 '#delete_style_btn': удалить стиль
 '#save_tabs_config': сохранить конфигурацию вкладок
+'#delete_item_from_mod_btn': удалить скин из модификации

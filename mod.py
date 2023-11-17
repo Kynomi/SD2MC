@@ -87,6 +87,16 @@ class Mod:
                 if item.style == style and item.custom_item == style_index:
                     item.style = new_style
 
+    def delete_item(self, item_name):
+        for item in self.items:
+            if item.get_item()[1] == item_name:
+                self.items.remove(item)
+
+    def __str__(self):
+        s = ''
+        for item in self.items:
+            s += f'{str(item)}\n'
+        return s
 
 class Mods:
     """Класс списка модов"""
@@ -176,10 +186,15 @@ class Mods:
             if k == mod_name:
                 v.delete_style(custom_item=custom_item)
 
+    def delete_mod(self, **mod_info):
+        for mod_name, mod in self.mods.items():
+            if mod_name == mod_info['mod_name']:
+                mod.delete_item(mod_info['item_name'])
+
     def __str__(self):
         string = ''
         for k, v in self.mods.items():
-            string += f'{k}, {str(v)} \n'
+            string += f'{k}:\n {str(v)} \n'
         return string
 
 

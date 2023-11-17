@@ -1,6 +1,7 @@
 '#menu_files': files
 '#menu_tabs': tabs
 '#create_mod': create modifications
+'#mods_created': mods created successfully
 '#save_mod_config': save configuration of modifications
 '#load_mod_config': load configuration of modifications
 '#settings': settings
@@ -18,3 +19,4 @@
 '#change_mod_config_btn': apply
 '#delete_style_btn': delete style
 '#save_tabs_config': save tabs configuration
+'#delete_item_from_mod_btn': delete item from modification
