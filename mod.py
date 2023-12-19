@@ -1,5 +1,5 @@
 from functions import vpk_parse, ParseError
-from re import findall, IGNORECASE, MULTILINE
+from re import findall, IGNORECASE, MULTILINE, search
 
 
 def find_only_one(expression, text, error):
@@ -10,7 +10,7 @@ def find_only_one(expression, text, error):
 
 
 def parse_script(item_name, items_game_text):
-    if item_name in items_game_text:
+    if search(item_name, items_game_text, flags=IGNORECASE):
         script_expression = r"({\s*\"name\"\s*?\"" + f"{item_name}" + r"\"[\s\S]*?)\s*?\"\d*?\"\s*?\t\t{\s*?^\t\t\t\"name\""
         return findall(script_expression, items_game_text, IGNORECASE + MULTILINE)[0]
     raise ParseError(f'Предмета {item_name} не существует')
@@ -107,7 +107,7 @@ class Mods:
     @staticmethod
     def find_default_item(custom_item, items_game_text):
         custom_item_script = parse_script(custom_item, items_game_text)
-        if 'arcana' in custom_item_script:
+        if '"item_rarity"\t\t"arcana"' in custom_item_script:
             raise ParseError('Данная программа не умеет делать арканы')
         default_item_script = None
         default_items = findall(r'\t\t{\n[^}]*?^\t\t\t"prefab"\t\t"default_item"[\s\S]*?^\t\t}', items_game_text,
