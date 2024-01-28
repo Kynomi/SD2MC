@@ -84,15 +84,18 @@ def add_mods(sender, app_data, mods):
     mod_name = dpg.get_value('mod_name_input')
     if not mod_name.strip() == '':
         custom_item = dpg.get_value('custom_itm_input')
+        if custom_item.strip() == '':
+            message_box('Введите название скина', 0)
+            return None
         style = dpg.get_value('style_itm_input')
         if not (dpg.get_value('style_itm_checkbox') and style.strip() != ''):
             style = None
-        dpg.set_value('custom_itm_input', '')
-        dpg.set_value('style_itm_input', '')
-        dpg.set_value('mod_name_input', mod_name)
-        dpg.set_value('style_itm_checkbox', False)
         try:
             mods.append_mod(custom_item=custom_item, style=style, mod_name=mod_name)
+            dpg.set_value('custom_itm_input', '')
+            dpg.set_value('style_itm_input', '')
+            dpg.set_value('mod_name_input', mod_name)
+            dpg.set_value('style_itm_checkbox', False)
             reload(mods)
         except ParseError as e:
             message_box(str(e), 0)

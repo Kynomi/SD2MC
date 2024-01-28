@@ -106,10 +106,14 @@ class Mods:
         self.mods = {}
 
     @staticmethod
-    def find_default_item(custom_item, items_game_text):
+    def find_default_item(custom_item, items_game_text, **kwargs):
         custom_item_script = parse_script(custom_item, items_game_text)
         if '"item_rarity"\t\t"arcana"' in custom_item_script:
             raise ParseError('Данная программа не умеет делать арканы')
+        if "style" in kwargs.keys():
+            styles = find_only_one(r'^\s*?\"styles\"[\s\S]*?^\t\t\t\t}', custom_item_script, 'У этого предмета нет стилей')
+            if f'\t\t\t\t\t"{kwargs["style"]-1}"' not in styles:
+                raise ParseError('Такого стиля не существует')
         default_item_script = None
         default_items = findall(r'\t\t{\n[^}]*?^\t\t\t"prefab"\t\t"default_item"[\s\S]*?^\t\t}', items_game_text,
                                    flags=MULTILINE+IGNORECASE)
@@ -136,7 +140,10 @@ class Mods:
         if 'default_item' not in mod_info.keys():
             with open('items_game.txt', 'r', encoding='utf-8') as items_game_file:
                 items_game_text = items_game_file.read()
-                default_item = self.find_default_item(custom_item, items_game_text)
+                if style is not None:
+                    default_item = self.find_default_item(custom_item, items_game_text, style=int(style))
+                else:
+                    default_item = self.find_default_item(custom_item, items_game_text)
         else:
             default_item = mod_info['default_item']
         if mod_name in self.mods.keys():
