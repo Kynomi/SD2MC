@@ -98,6 +98,7 @@ class Mod:
             s += f'{str(item)}\n'
         return s
 
+
 class Mods:
     """Класс списка модов"""
 

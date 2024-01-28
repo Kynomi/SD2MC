@@ -96,6 +96,8 @@ def add_mods(sender, app_data, mods):
             reload(mods)
         except ParseError as e:
             message_box(str(e), 0)
+    else:
+        message_box('Введите название модификации', 0)
 
 
 def clear_change_mod_inputs(new_mod_name, mods):
